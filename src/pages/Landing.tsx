@@ -109,7 +109,7 @@ export default function Landing() {
       <main style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', paddingLeft: 24, paddingRight: 24, paddingTop: 0, position: 'relative', zIndex: 1 }}>
         <div style={{ textAlign: 'center' }}>
           <h1 style={{ color: '#FFFFFF', fontSize: isDesktopXL ? 92 : isDesktop ? 80 : isTablet ? 72 : window.innerWidth > 400 ? 56 : 46, fontWeight: 900, letterSpacing: -3, marginTop: 0, marginBottom: 34, textTransform: 'uppercase', fontFamily: '"Big Shoulders Display", sans-serif' }}>COMING SOON</h1>
-          <p style={{ color: '#FFFFFF', fontSize: isDesktopXL ? 22 : isDesktop ? 20 : isTablet ? 18 : window.innerWidth > 400 ? 16 : 15, lineHeight: isDesktopXL ? '30px' : isDesktop ? '28px' : isTablet ? '26px' : window.innerWidth > 400 ? '22px' : '20px', maxWidth: isDesktopXL ? 760 : isDesktop ? 700 : isTablet ? 606 : 400, margin: '0 auto', fontFamily: '"Noto Sans", sans-serif' }}>
+          <p style={{ color: '#FFFFFF', fontSize: isDesktopXL ? 22 : isDesktop ? 20 : isTablet ? 18 : window.innerWidth > 400 ? 16 : 15, lineHeight: isDesktopXL ? '30px' : isDesktop ? '28px' : isTablet ? '26px' : window.innerWidth > 400 ? '22px' : '20px', maxWidth: isDesktopXL ? 760 : isDesktop ? 700 : isTablet ? 606 : 400, margin: '0 auto', fontFamily: '"IBM Plex Sans", system-ui, sans-serif' }}>
             Ascend is building the infrastructure layer for<br />
             competitive eSports in South Asia powered by data,<br />
             scaled through automation, and built for players.
@@ -128,9 +128,9 @@ export default function Landing() {
               placeholder="Email"
               aria-label="Email"
               disabled={loading}
-              style={{ flex: 1, color: '#FFFFFF', fontSize: isDesktop ? 18 : isTablet ? 20 : 16, paddingRight: 10, background: 'transparent', border: 'none', outline: 'none', fontFamily: '"Noto Sans", sans-serif' }}
+              style={{ flex: 1, color: '#FFFFFF', fontSize: isDesktop ? 18 : isTablet ? 20 : 16, paddingRight: 10, background: 'transparent', border: 'none', outline: 'none', fontFamily: '"IBM Plex Sans", sans-serif', fontWeight: 400 }}
             />
-            <button type="submit" disabled={loading} style={{ backgroundColor: '#532AAB', borderRadius: 60, paddingLeft: isDesktop ? 48 : isTablet ? 56 : 28, paddingRight: isDesktop ? 48 : isTablet ? 56 : 28, height: isDesktop ? 56 : isTablet ? 64 : 48, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#FFFFFF', fontSize: isDesktop ? 18 : isTablet ? 20 : 16, fontWeight: 600, border: 'none', cursor: 'pointer', opacity: loading ? 0.7 : 1 }}>
+            <button type="submit" disabled={loading} style={{ backgroundColor: '#532AAB', borderRadius: 60, paddingLeft: isDesktop ? 48 : isTablet ? 56 : 28, paddingRight: isDesktop ? 48 : isTablet ? 56 : 28, height: isDesktop ? 56 : isTablet ? 64 : 48, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#FFFFFF', fontSize: isDesktop ? 18 : isTablet ? 20 : 16, fontWeight: 600, border: 'none', cursor: 'pointer', opacity: loading ? 0.7 : 1, fontFamily: '"IBM Plex Sans", system-ui, sans-serif' }}>
               {loading ? 'Please wait…' : 'Sign up'}
             </button>
           </form>
