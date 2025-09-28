@@ -144,7 +144,7 @@ export default function WebGLGlassHeader({ children, width = 400, height = 80 }:
     gl.attachShader(program, vertexShader);
     gl.attachShader(program, fragmentShader);
     gl.linkProgram(program);
-    if (!gl.getProgramParameter(program, gl.linkStatus || gl.LINK_STATUS)) {
+    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
       const info = gl.getProgramInfoLog(program) || 'Unknown program link error';
       throw new Error(`Program link error: ${info}`);
     }
