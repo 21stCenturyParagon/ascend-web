@@ -137,12 +137,12 @@ export default function Landing() {
           <div style={{ paddingLeft: isTablet ? 40 : 20, paddingRight: isTablet ? 40 : 20, paddingTop: isTablet ? 12 : 8, paddingBottom: isTablet ? 12 : 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', maxWidth: headerMaxWidth, overflow: 'hidden' }}>
             <LogoSVG style={{ width: isTablet ? 156 : 120, height: isTablet ? 22 : 17 }} />
             <div style={{ display: 'flex', gap: isTablet ? 24 : 16, alignItems: 'center' }}>
-              <a href="https://twitter.com/ascend" target="_blank" rel="noreferrer" aria-label="Twitter"><TwitterSVG size={21} /></a>
-              <a href="https://instagram.com/ascend" target="_blank" rel="noreferrer" aria-label="Instagram"><InstagramSVG size={23} /></a>
-              <a href="https://linkedin.com/company/ascend" target="_blank" rel="noreferrer" aria-label="LinkedIn"><LinkedInSVG size={isTablet ? 24 : 21} /></a>
+              <a href="https://x.com/play_ascend" target="_blank" rel="noreferrer" aria-label="Twitter"><TwitterSVG size={21} /></a>
+              <a href="https://www.instagram.com/play_ascend/" target="_blank" rel="noreferrer" aria-label="Instagram"><InstagramSVG size={23} /></a>
+              <a href="https://www.linkedin.com/company/ascend-interactive/" target="_blank" rel="noreferrer" aria-label="LinkedIn"><LinkedInSVG size={isTablet ? 24 : 21} /></a>
             </div>
           </div>
-        </WebGLGlassHeader>
+        </WebGLGlassHeader> 
       </header>
 
       <main style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', paddingLeft: 24, paddingRight: 24, paddingTop: 0, position: 'relative', zIndex: 1 }}>
