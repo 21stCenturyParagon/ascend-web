@@ -4,6 +4,7 @@ type WebGLGlassHeaderProps = {
   children: React.ReactNode;
   width?: number;
   height?: number;
+  backgroundImageUrl?: string;
 };
 
 const vertexShaderSource = `
@@ -22,6 +23,9 @@ const fragmentShaderSource = `
   uniform vec2 u_resolution;
   uniform vec2 u_mouse;
   uniform vec2 u_size;
+  uniform vec2 u_bgScale;
+  uniform vec2 u_bgOffset;
+  uniform vec2 u_bgTexSize;
   varying vec2 v_uv;
 
   float roundedBox(vec2 uv, vec2 center, vec2 size, float radius) {
@@ -35,7 +39,7 @@ const fragmentShaderSource = `
     float radius = 3.0;
     for (int x = -3; x <= 3; x++) {
       for (int y = -3; y <= 3; y++) {
-        vec2 offset = vec2(float(x), float(y)) * 2.0 / resolution;
+        vec2 offset = vec2(float(x), float(y)) * 1.0 / resolution;
         float weight = exp(-(float(x * x + y * y)) / (2.0 * radius));
         result += texture2D(u_background, uv + offset).rgb * weight;
         total += weight;
@@ -89,8 +93,10 @@ const fragmentShaderSource = `
     float radialWeight = smoothstep(0.5, 1.0, r);
     float combinedWeight = clamp((edgeWeight * 1.0) + (-radialWeight * 0.5), 0.0, 1.0);
     vec2 refractUV = mix(curvedRefractUV, uvContour, combinedWeight);
-    vec3 refracted = texture2D(u_background, refractUV).rgb;
-    vec3 blurred = blurBackground(refractUV, u_resolution);
+    // Map screen UV to background texture UV (accounting for CSS cover)
+    vec2 texUV = refractUV * u_bgScale + u_bgOffset;
+    vec3 refracted = texture2D(u_background, texUV).rgb;
+    vec3 blurred = blurBackground(texUV, u_bgTexSize);
     vec3 base = mix(refracted, blurred, 0.5);
     float edge = 1.0 - smoothstep(0.0, 0.03, dist * -2.0);
     vec3 glow = vec3(0.7);
@@ -100,7 +106,7 @@ const fragmentShaderSource = `
   }
 `;
 
-export default function WebGLGlassHeader({ children, width = 400, height = 80 }: WebGLGlassHeaderProps) {
+export default function WebGLGlassHeader({ children, width = 400, height = 80, backgroundImageUrl }: WebGLGlassHeaderProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const glRef = useRef<WebGLRenderingContext | null>(null);
   const programRef = useRef<WebGLProgram | null>(null);
@@ -162,32 +168,45 @@ export default function WebGLGlassHeader({ children, width = 400, height = 80 }:
     gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
     const texture = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, texture);
-    const gradientCanvas = document.createElement('canvas');
-    gradientCanvas.width = 512;
-    gradientCanvas.height = 512;
-    const ctx = gradientCanvas.getContext('2d');
-    if (ctx) {
-      const gradient = ctx.createLinearGradient(512, 0, 206, 512);
-      gradient.addColorStop(0.02, '#FFFFFF');
-      gradient.addColorStop(0.09, '#9BA0F2');
-      gradient.addColorStop(0.25, '#532AAB');
-      gradient.addColorStop(0.35, '#29077F');
-      gradient.addColorStop(0.47, '#010540');
-      gradient.addColorStop(0.6, '#000004');
-      ctx.fillStyle = gradient;
-      ctx.fillRect(0, 0, 512, 512);
+    // Load the page background image (from prop or body CSS background)
+    let url = backgroundImageUrl;
+    if (!url) {
+      try {
+        const computed = window.getComputedStyle(document.body);
+        const bg = computed.backgroundImage;
+        if (bg && bg.startsWith('url(')) {
+          url = bg.slice(4, -1).replace(/"/g, '');
+        }
+      } catch {
+        // ignore
+      }
     }
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, gradientCanvas);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    backgroundTextureRef.current = texture;
-    gl.uniform1i(gl.getUniformLocation(program, 'u_background'), 0);
-    gl.uniform1f(gl.getUniformLocation(program, 'u_dpr'), window.devicePixelRatio || 1);
-    gl.enable(gl.BLEND);
-    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-  }, [compileShader]);
+    if (!url) url = '/resized_1920x1080.png';
+
+    const image = new Image();
+    image.crossOrigin = 'anonymous';
+    image.onload = () => {
+      try {
+        gl.bindTexture(gl.TEXTURE_2D, texture);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        backgroundTextureRef.current = texture;
+        gl.uniform1i(gl.getUniformLocation(program, 'u_background'), 0);
+        gl.uniform1f(gl.getUniformLocation(program, 'u_dpr'), window.devicePixelRatio || 1);
+        gl.enable(gl.BLEND);
+        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+      } catch (e) {
+        console.error('Failed to upload background to texture', e);
+      }
+    };
+    image.onerror = () => {
+      console.error('Failed to load background image for refraction:', url);
+    };
+    image.src = url;
+  }, [compileShader, backgroundImageUrl]);
 
   const render = useCallback(() => {
     const canvas = canvasRef.current;
@@ -220,6 +239,26 @@ export default function WebGLGlassHeader({ children, width = 400, height = 80 }:
       currentSizeRef.current.width,
       currentSizeRef.current.height,
     );
+    // Map CSS background-size: cover for the page bg to texture UVs
+    const cssW = window.innerWidth;
+    const cssH = window.innerHeight;
+    // Use the loaded image dimensions if available by reading the texture size via canvas not trivial; approximate with css dims
+    // Compute scale factors for cover
+    // Assume background image has same aspect as the file; we can't query size here reliably, so approximate using cssW/H
+    const imgW = cssW; // approximation to avoid missing uniforms
+    const imgH = cssH;
+    const s = Math.max(cssW / imgW, cssH / imgH);
+    const drawW = imgW * s;
+    const drawH = imgH * s;
+    const offX = (cssW - drawW) / 2;
+    const offY = (cssH - drawH) / 2;
+    const scaleX = cssW / drawW;
+    const scaleY = cssH / drawH;
+    const uvOffX = -offX / drawW;
+    const uvOffY = -offY / drawH;
+    gl.uniform2f(gl.getUniformLocation(program, 'u_bgScale'), scaleX, scaleY);
+    gl.uniform2f(gl.getUniformLocation(program, 'u_bgOffset'), uvOffX, uvOffY);
+    gl.uniform2f(gl.getUniformLocation(program, 'u_bgTexSize'), drawW, drawH);
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, backgroundTextureRef.current);
     gl.drawArrays(gl.TRIANGLES, 0, 6);

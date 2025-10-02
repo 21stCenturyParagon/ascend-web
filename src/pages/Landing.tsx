@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { PacmanLoader, ClipLoader } from 'react-spinners';
-import controllerImage from '../assets/controller.png';
+// import controllerImage from '../assets/controller.png';
 import WebGLGlassHeader from '../components/WebGLGlassHeader';
 import { addToWaitlist } from '../lib/supabase';
 
@@ -131,9 +131,9 @@ export default function Landing() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', background: 'linear-gradient(210deg, #FFFFFF 2%, #9BA0F2 9%, #532AAB 25%, #29077F 35%, #010540 47%, #000004 60%)' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', backgroundImage: 'url(/resized_1920x1080.png)', backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}>
       <header style={{ paddingTop: 44, paddingLeft: isTablet ? 80 : 24, paddingRight: isTablet ? 80 : 24, paddingBottom: 0, display: 'flex', justifyContent: 'center' }}>
-        <WebGLGlassHeader width={headerMaxWidth} height={isTablet ? 84 : 64}>
+        <WebGLGlassHeader width={headerMaxWidth} height={isTablet ? 84 : 64} backgroundImageUrl={'/resized_1920x1080.png'}>
           <div style={{ paddingLeft: isTablet ? 40 : 20, paddingRight: isTablet ? 40 : 20, paddingTop: isTablet ? 12 : 8, paddingBottom: isTablet ? 12 : 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', maxWidth: headerMaxWidth, overflow: 'hidden' }}>
             <LogoSVG style={{ width: isTablet ? 156 : 120, height: isTablet ? 22 : 17 }} />
             <div style={{ display: 'flex', gap: isTablet ? 24 : 16, alignItems: 'center' }}>
@@ -159,7 +159,12 @@ export default function Landing() {
       <section style={{ display: 'flex', justifyContent: 'center', paddingLeft: isTablet ? 80 : 24, paddingRight: isTablet ? 80 : 24, paddingBottom: isDesktop ? 110 : isTablet ? 96 : 72, position: 'relative', zIndex: 1 }}>
         <div style={{ width: '100%', maxWidth: isDesktopXL ? 1200 : isDesktop ? 1040 : isTablet ? 860 : 680, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           <div style={{ color: '#FFFFFF', fontSize: isDesktop ? 22 : isTablet ? 20 : 18, fontWeight: 800, letterSpacing: 2, marginBottom: 20, textTransform: 'uppercase', fontFamily: '"Big Shoulders Display", sans-serif' }}>JOIN THE WAITLIST</div>
-          <form onSubmit={onSubmit} style={{ backgroundColor: 'rgba(20,20,20,0.8)', borderRadius: 60, display: 'flex', width: '100%', maxWidth: isDesktopXL ? 700 : isDesktop ? 640 : isTablet ? 685 : 500, height: isDesktop ? 64 : isTablet ? 72 : 56, paddingLeft: isDesktop ? 24 : isTablet ? 22 : 16, paddingRight: 4, alignItems: 'center' }}>
+          <WebGLGlassHeader
+            width={isDesktopXL ? 700 : isDesktop ? 640 : isTablet ? 685 : 500}
+            height={isDesktop ? 64 : isTablet ? 72 : 56}
+            backgroundImageUrl={'/resized_1920x1080.png'}
+          >
+          <form onSubmit={onSubmit} style={{ background: 'transparent', borderRadius: 60, display: 'flex', width: '100%', maxWidth: isDesktopXL ? 700 : isDesktop ? 640 : isTablet ? 685 : 500, height: isDesktop ? 64 : isTablet ? 72 : 56, paddingLeft: isDesktop ? 24 : isTablet ? 22 : 16, paddingRight: 4, alignItems: 'center' }}>
             <input
               type="email"
               value={email}
@@ -173,10 +178,11 @@ export default function Landing() {
               {loading ? <ClipLoader color="#FFFFFF" size={18} /> : 'Sign up'}
             </button>
           </form>
+          </WebGLGlassHeader>
         </div>
-        <div style={{ position: 'fixed', left: 0, bottom: 0, width: Math.min(isTablet ? 500 : 340, window.innerWidth * 0.6), height: Math.min(isTablet ? 500 : 340, window.innerWidth * 0.6), zIndex: -1, pointerEvents: 'none' }}>
+        {/* <div style={{ position: 'fixed', left: 0, bottom: 0, width: Math.min(isTablet ? 500 : 340, window.innerWidth * 0.6), height: Math.min(isTablet ? 500 : 340, window.innerWidth * 0.6), zIndex: -1, pointerEvents: 'none' }}>
           <img src={controllerImage} alt="controller" style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'left bottom', display: 'block' }} />
-        </div>
+        </div> */}
       </section>
 
       {/* Page loader overlay with fade-out */}
