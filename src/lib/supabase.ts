@@ -60,6 +60,7 @@ export async function signInWithDiscord(redirectPath: string = '/auth/callback')
       provider: 'discord',
       options: {
         redirectTo: `${redirectOrigin}${redirectPath}`,
+        scopes: 'identify email guilds',
       },
     });
     if (error) throw error;
@@ -68,6 +69,78 @@ export async function signInWithDiscord(redirectPath: string = '/auth/callback')
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error starting Discord OAuth';
     throw new Error(message);
+  }
+}
+
+// Check if user is a member of the Ascend Discord server
+export async function checkDiscordServerMembership(): Promise<{ isMember: boolean; error?: string }> {
+  const client = getSupabase();
+  try {
+    const { data: { session }, error: sessionError } = await client.auth.getSession();
+    if (sessionError) throw sessionError;
+    if (!session) throw new Error('No active session');
+
+    const providerToken = session.provider_token;
+    if (!providerToken) {
+      throw new Error('Discord access token not found. Please re-authenticate.');
+    }
+
+    const guildId = getRequiredEnv('VITE_DISCORD_GUILD_ID');
+    
+    // Check if user is in the specific guild
+    const response = await fetch(`https://discord.com/api/v10/users/@me/guilds`, {
+      headers: {
+        Authorization: `Bearer ${providerToken}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Discord API error: ${response.status}`);
+    }
+
+    const guilds = await response.json() as Array<{ id: string }>;
+    const isMember = guilds.some(guild => guild.id === guildId);
+
+    return { isMember };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Unknown error checking Discord membership';
+    return { isMember: false, error: message };
+  }
+}
+
+// Save player registration to database
+export async function savePlayerRegistration(data: {
+  riotId: string;
+  twitter?: string;
+  youtube?: string;
+  ownsAccount: boolean;
+}): Promise<{ success: boolean; error?: string }> {
+  const client = getSupabase();
+  try {
+    const { data: { user }, error: userError } = await client.auth.getUser();
+    if (userError) throw userError;
+    if (!user) throw new Error('User not authenticated');
+
+    const { error: insertError } = await client.from('player_registrations').insert([{
+      user_id: user.id,
+      riot_id: data.riotId.trim(),
+      twitter: data.twitter?.trim() || null,
+      youtube: data.youtube?.trim() || null,
+      owns_account: data.ownsAccount,
+      created_at: new Date().toISOString(),
+    }]);
+
+    if (insertError) {
+      if ((insertError as any).code === '23505') {
+        return { success: false, error: 'You have already submitted a registration.' };
+      }
+      throw insertError;
+    }
+
+    return { success: true };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Unknown error saving registration';
+    return { success: false, error: message };
   }
 }
 

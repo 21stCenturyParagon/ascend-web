@@ -13,7 +13,6 @@ function DiscordIcon({ size = 24 }: { size?: number }) {
 
 export default function Register() {
   const { isTablet, headerMaxWidth } = useResponsiveLayout();
-  const cardMaxWidth = Math.min(headerMaxWidth, isTablet ? 505 : 380);
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', backgroundColor: '#0C0E12', position: 'relative' }}>
@@ -29,7 +28,7 @@ export default function Register() {
       </div> */}
 
       <main style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', paddingLeft: 24, paddingRight: 24, position: 'relative', zIndex: 1 }}>
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '48px 0px', gap: 40, width: cardMaxWidth, maxWidth: '100%', background: '#0C0E12' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '48px 0px', gap: 40, width: '100%', maxWidth: headerMaxWidth, background: 'transparent', boxSizing: 'border-box' }}>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: 0, gap: 24, width: '100%' }}>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', padding: 0, gap: 8, width: '100%' }}>
               <div style={{ width: '100%', height: 32, textAlign: 'center', color: '#F7F7F7', fontFamily: '"IBM Plex Sans", system-ui, sans-serif', fontWeight: 600, fontSize: 24, lineHeight: '32px' }}>Welcome to Ascend Leagues</div>

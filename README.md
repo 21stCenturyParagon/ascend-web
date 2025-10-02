@@ -8,6 +8,7 @@ Setup
 ```
 VITE_SUPABASE_URL=your-url
 VITE_SUPABASE_ANON_KEY=your-anon-key
+VITE_DISCORD_GUILD_ID=your-discord-server-id
 ```
 2. Install dependencies:
 ```
@@ -20,7 +21,11 @@ npm run dev
 
 Notes
 - Waitlist form inserts rows into the `waitlist` table via Supabase.
+- Registration flow checks Discord server membership before saving to `player_registrations` table.
 - WebGL glass header requires WebGL; it falls back silently if unsupported.
+
+## Discord Integration
+See [DISCORD_SETUP.md](./DISCORD_SETUP.md) for detailed setup instructions for Discord OAuth and server membership verification.
 # React + TypeScript + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
