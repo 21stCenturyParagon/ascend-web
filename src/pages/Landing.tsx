@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { PacmanLoader, ClipLoader } from 'react-spinners';
+import { ClipLoader } from 'react-spinners';
+import { AiOutlineLoading3Quarters } from 'react-icons/ai';
 // import controllerImage from '../assets/controller.png';
 import WebGLGlassHeader from '../components/WebGLGlassHeader';
 import BrandHeader from '../components/BrandHeader';
@@ -131,9 +132,10 @@ export default function Landing() {
       {/* Page loader overlay with fade-out */}
       {pageLoading && (
         <div style={{ position: 'fixed', inset: 0, zIndex: 9998, backgroundColor: '#000000', display: 'flex', justifyContent: 'center', alignItems: 'center', transition: 'opacity 400ms ease', opacity: overlayOpacity, pointerEvents: overlayOpacity === 0 ? ('none' as React.CSSProperties['pointerEvents']) : 'auto' }}>
-          <div style={{ alignItems: 'center', display: 'flex', flexDirection: 'column' }}>
-            <PacmanLoader color="#8B5CF6" loading={true} size={35} speedMultiplier={1} />
-            <div style={{ color: '#FFFFFF', fontSize: 16, marginTop: 20, letterSpacing: 1.5, textTransform: 'uppercase', fontFamily: '"IBM Plex Sans", system-ui, sans-serif' }}>Loading</div>
+          <div style={{ alignItems: 'center', display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <AiOutlineLoading3Quarters size={48} color="#7F56D9" style={{ animation: 'spin 1s linear infinite' }} />
+            <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
+            <div style={{ color: '#FFFFFF', fontSize: 16, letterSpacing: 1.5, textTransform: 'uppercase', fontFamily: '"IBM Plex Sans", system-ui, sans-serif' }}>Loading</div>
           </div>
         </div>
       )}

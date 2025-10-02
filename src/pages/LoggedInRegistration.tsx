@@ -2,6 +2,8 @@ import BrandHeader from '../components/BrandHeader';
 import useResponsiveLayout from '../hooks/useResponsiveLayout';
 import { useEffect, useState } from 'react';
 import { getSupabase, checkDiscordServerMembership, savePlayerRegistration } from '../lib/supabase';
+import { IoMdRefresh } from 'react-icons/io';
+import { AiOutlineLoading3Quarters } from 'react-icons/ai';
 
 function DiscordIcon({ size = 24 }: { size?: number }) {
   return (
@@ -14,7 +16,6 @@ function DiscordIcon({ size = 24 }: { size?: number }) {
 
 export default function LoggedInRegistration() {
   const { isTablet, headerMaxWidth } = useResponsiveLayout();
-  const [email, setEmail] = useState<string>('');
   const [displayName, setDisplayName] = useState<string>('');
   const [avatarUrl, setAvatarUrl] = useState<string>('');
   const [riotId, setRiotId] = useState<string>('');
@@ -27,6 +28,7 @@ export default function LoggedInRegistration() {
   const [showDiscordPrompt, setShowDiscordPrompt] = useState<boolean>(false);
   const [applicationSubmitted, setApplicationSubmitted] = useState<boolean>(false);
   const [checking, setChecking] = useState<boolean>(false);
+  const [initialLoading, setInitialLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const client = getSupabase();
@@ -34,10 +36,9 @@ export default function LoggedInRegistration() {
     async function checkExistingRegistration() {
       try {
         const { data } = await client.auth.getUser();
-        const u = data?.user as { email?: string | null; user_metadata?: Record<string, unknown>; id?: string } | null;
+        const u = data?.user as { user_metadata?: Record<string, unknown>; id?: string } | null;
         
         if (u) {
-          setEmail(u.email || '');
           const meta = (u.user_metadata || {}) as { full_name?: string; name?: string; avatar_url?: string };
           setDisplayName(meta.full_name || meta.name || '');
           if (typeof meta.avatar_url === 'string' && meta.avatar_url) {
@@ -58,6 +59,8 @@ export default function LoggedInRegistration() {
         }
       } catch (e) {
         console.error('Failed to fetch user for registration page:', e);
+      } finally {
+        setInitialLoading(false);
       }
     }
     
@@ -117,49 +120,69 @@ export default function LoggedInRegistration() {
     }
   }
 
+  // Show loading spinner during initial check
+  if (initialLoading) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundImage: 'url(/image.png)', position: 'relative', overflow: 'hidden' }}>
+        <BrandHeader isTablet={isTablet} headerMaxWidth={headerMaxWidth} backgroundImageUrl={'/image.png'} />
+        
+        <main style={{ flex: 1, position: 'relative', zIndex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px', width: '100%', boxSizing: 'border-box' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
+            <AiOutlineLoading3Quarters size={48} color="#7F56D9" style={{ animation: 'spin 1s linear infinite' }} />
+            <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
+            <div style={{ color: '#94979C', fontSize: 16, fontFamily: '"IBM Plex Sans", system-ui, sans-serif' }}>Loading...</div>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
   // Show Discord join prompt if user is not in server
   if (showDiscordPrompt) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: '#0C0E12', position: 'relative', overflow: 'hidden' }}>
-        <BrandHeader isTablet={isTablet} headerMaxWidth={headerMaxWidth} backgroundImageUrl={'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="2" height="2"><rect width="2" height="2" fill="%230C0E12"/></svg>'} />
+      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundImage: 'url(/image.png)', position: 'relative', overflow: 'hidden' }}>
+        <BrandHeader isTablet={isTablet} headerMaxWidth={headerMaxWidth} backgroundImageUrl={'/image.png'} />
         
         <main style={{ flex: 1, position: 'relative', zIndex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px', width: '100%', boxSizing: 'border-box' }}>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 40, width: '100%', maxWidth: headerMaxWidth, background: 'transparent', boxSizing: 'border-box' }}>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 24, width: '100%' }}>
+              <img src="/server.png" alt="Discord Server" style={{ maxWidth: '100%', height: 'auto', marginBottom: 8 }} />
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, width: '100%' }}>
-                <div style={{ width: '100%', textAlign: 'center', color: '#F7F7F7', fontFamily: '"IBM Plex Sans", system-ui, sans-serif', fontWeight: 600, fontSize: 24, lineHeight: '32px' }}>Join Ascend Discord to Register</div>
+                <div style={{ width: '100%', textAlign: 'center', color: '#F7F7F7', fontFamily: '"IBM Plex Sans", system-ui, sans-serif', fontWeight: 600, fontSize: 24, lineHeight: '32px' }}>Uh oh! You aren't on the Discord!</div>
                 <div style={{ width: '100%', textAlign: 'center', color: '#94979C', fontFamily: '"IBM Plex Sans", system-ui, sans-serif', fontWeight: 400, fontSize: 16, lineHeight: '24px', maxWidth: 500 }}>In order to participate in Ascend Leagues, you need to be part of the Ascend discord server.</div>
               </div>
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12, width: '100%', maxWidth: 473, boxSizing: 'border-box' }}>
-              <button
-                onClick={() => window.open('https://discord.gg/play-ascend', '_blank')}
-                style={{ boxSizing: 'border-box', display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center', padding: '10px 16px', gap: 12, width: '100%', height: 44, background: '#000000', border: 'none', borderRadius: 8, color: '#FFFFFF', cursor: 'pointer', fontFamily: '"IBM Plex Sans", system-ui, sans-serif', fontWeight: 600, fontSize: 16 }}
-                aria-label="Join Ascend Discord"
-              >
-                <DiscordIcon size={24} />
-                <span>Join Ascend</span>
-              </button>
+              <div style={{ display: 'flex', flexDirection: 'row', gap: 12, width: '100%' }}>
+                <button
+                  onClick={() => window.open('https://discord.gg/play-ascend', '_blank')}
+                  style={{ boxSizing: 'border-box', display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center', padding: '10px 16px', gap: 12, flex: 1, height: 44, background: '#0C0E12', border: '1px solid #373A41', borderRadius: 8, color: '#CECFD2', cursor: 'pointer', fontFamily: '"IBM Plex Sans", system-ui, sans-serif', fontWeight: 600, fontSize: 16 }}
+                  aria-label="Join Ascend Discord"
+                >
+                  <DiscordIcon size={24} />
+                  <span>Join Ascend</span>
+                </button>
 
-              <button
-                onClick={async () => {
-                  try {
-                    setChecking(true);
-                    await checkAndProceed();
-                  } catch (e) {
-                    const msg = e instanceof Error ? e.message : 'Unknown error';
-                    setError(msg);
-                  } finally {
-                    setChecking(false);
-                  }
-                }}
-                disabled={checking}
-                style={{ boxSizing: 'border-box', display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center', padding: '10px 16px', gap: 12, width: '100%', height: 44, background: '#0C0E12', border: '1px solid #373A41', borderRadius: 8, color: '#CECFD2', cursor: 'pointer', fontFamily: '"IBM Plex Sans", system-ui, sans-serif', fontWeight: 600, fontSize: 16, opacity: checking ? 0.85 : 1 }}
-                aria-label="Recheck Discord membership"
-              >
-                {checking ? 'Checking...' : 'Recheck'}
-              </button>
+                <button
+                  onClick={async () => {
+                    try {
+                      setChecking(true);
+                      await checkAndProceed();
+                    } catch (e) {
+                      const msg = e instanceof Error ? e.message : 'Unknown error';
+                      setError(msg);
+                    } finally {
+                      setChecking(false);
+                    }
+                  }}
+                  disabled={checking}
+                  style={{ boxSizing: 'border-box', display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center', padding: '10px', width: 44, height: 44, background: '#0C0E12', border: '1px solid #373A41', borderRadius: 8, color: '#CECFD2', cursor: 'pointer', opacity: checking ? 0.85 : 1 }}
+                  aria-label="Recheck Discord membership"
+                >
+                  <IoMdRefresh size={20} style={{ transform: checking ? 'rotate(360deg)' : 'rotate(0deg)', transition: 'transform 0.6s ease' }} />
+                </button>
+              </div>
 
               {error && <div role="alert" style={{ color: '#EF4444', fontSize: 14, textAlign: 'center', width: '100%' }}>{error}</div>}
               
@@ -176,13 +199,36 @@ export default function LoggedInRegistration() {
   // Show success page if application submitted
   if (applicationSubmitted) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: '#0C0E12', position: 'relative', overflow: 'hidden' }}>
-        <BrandHeader isTablet={isTablet} headerMaxWidth={headerMaxWidth} backgroundImageUrl={'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="2" height="2"><rect width="2" height="2" fill="%230C0E12"/></svg>'} />
+      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundImage: 'url(/image.png)', position: 'relative', overflow: 'hidden' }}>
+        <BrandHeader isTablet={isTablet} headerMaxWidth={headerMaxWidth} backgroundImageUrl={'/image.png'} />
         
         <main style={{ flex: 1, position: 'relative', zIndex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px', width: '100%', boxSizing: 'border-box' }}>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 32, width: '100%', maxWidth: headerMaxWidth, background: 'transparent', boxSizing: 'border-box' }}>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16, width: '100%' }}>
-              <div style={{ fontSize: 48, marginBottom: 8, color: '#10B981' }}>✓</div>
+              <svg width="57" height="56" viewBox="0 0 57 56" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ marginBottom: 8 }}>
+                <g filter="url(#filter0_ii_240_4219)">
+                  <path d="M0.5 12C0.5 5.37258 5.87258 0 12.5 0H44.5C51.1274 0 56.5 5.37258 56.5 12V44C56.5 50.6274 51.1274 56 44.5 56H12.5C5.87258 56 0.5 50.6274 0.5 44V12Z" fill="none"/>
+                  <path d="M12.5 0.5H44.5C50.8513 0.5 56 5.64873 56 12V44C56 50.3513 50.8513 55.5 44.5 55.5H12.5C6.14873 55.5 1 50.3513 1 44V12C1 5.64873 6.14873 0.5 12.5 0.5Z" stroke="#373A41"/>
+                  <path d="M23.2502 28L26.7502 31.5L33.7502 24.5M40.1668 28C40.1668 34.4434 34.9435 39.6667 28.5002 39.6667C22.0568 39.6667 16.8335 34.4434 16.8335 28C16.8335 21.5567 22.0568 16.3334 28.5002 16.3334C34.9435 16.3334 40.1668 21.5567 40.1668 28Z" stroke="#CECFD2" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </g>
+                <defs>
+                  <filter id="filter0_ii_240_4219" x="0.5" y="0" width="56" height="56" filterUnits="userSpaceOnUse" colorInterpolationFilters="sRGB">
+                    <feFlood floodOpacity="0" result="BackgroundImageFix"/>
+                    <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+                    <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+                    <feOffset dy="-2"/>
+                    <feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1"/>
+                    <feColorMatrix type="matrix" values="0 0 0 0 0.0470588 0 0 0 0 0.054902 0 0 0 0 0.0705882 0 0 0 0.05 0"/>
+                    <feBlend mode="normal" in2="shape" result="effect1_innerShadow_240_4219"/>
+                    <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+                    <feMorphology radius="1" operator="erode" in="SourceAlpha" result="effect2_innerShadow_240_4219"/>
+                    <feOffset/>
+                    <feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1"/>
+                    <feColorMatrix type="matrix" values="0 0 0 0 0.0470588 0 0 0 0 0.054902 0 0 0 0 0.0705882 0 0 0 0.18 0"/>
+                    <feBlend mode="normal" in2="effect1_innerShadow_240_4219" result="effect2_innerShadow_240_4219"/>
+                  </filter>
+                </defs>
+              </svg>
               <div style={{ width: '100%', textAlign: 'center', color: '#F7F7F7', fontFamily: '"IBM Plex Sans", system-ui, sans-serif', fontWeight: 600, fontSize: 24, lineHeight: '32px' }}>Application Submitted!</div>
               <div style={{ width: '100%', textAlign: 'center', color: '#94979C', fontFamily: '"IBM Plex Sans", system-ui, sans-serif', fontWeight: 400, fontSize: 16, lineHeight: '24px', maxWidth: 500 }}>
                 Your registration is under review. We'll notify you on Discord once your application has been approved.
@@ -190,6 +236,9 @@ export default function LoggedInRegistration() {
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12, width: '100%', maxWidth: 473, boxSizing: 'border-box' }}>
+            <div style={{ width: '100%', textAlign: 'center', color: '#94979C', fontFamily: '"IBM Plex Sans", system-ui, sans-serif', fontWeight: 400, fontSize: 16, lineHeight: '24px', maxWidth: 500 }}>
+            Current waiting time ≈30 minutes
+              </div>
               <button
                 onClick={() => window.location.href = '/'}
                 style={{ boxSizing: 'border-box', display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center', padding: '10px 16px', width: '100%', height: 44, background: '#7F56D9', boxShadow: 'inset 0px 0px 0px 1px rgba(12, 14, 18, 0.18), inset 0px -2px 0px rgba(12, 14, 18, 0.05)', borderRadius: 8, color: '#FFFFFF', cursor: 'pointer', fontFamily: '"IBM Plex Sans", system-ui, sans-serif', fontWeight: 600, fontSize: 16, border: 'none' }}
@@ -209,8 +258,8 @@ export default function LoggedInRegistration() {
 
   // Default: Show registration form
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: '#0C0E12', position: 'relative', overflow: 'hidden' }}>
-      <BrandHeader isTablet={isTablet} headerMaxWidth={headerMaxWidth} backgroundImageUrl={'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="2" height="2"><rect width="2" height="2" fill="%230C0E12"/></svg>'} />
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundImage: 'url(/image.png)', position: 'relative', overflow: 'hidden' }}>
+      <BrandHeader isTablet={isTablet} headerMaxWidth={headerMaxWidth} backgroundImageUrl={'/image.png'} />
 
       {/* Background gradient strips per Figma
       <div style={{ position: 'absolute', width: 2809, height: 3233.41, left: 'calc(50% - 2809px/2 - 212.7px)', top: -473, transform: 'rotate(-90deg)', pointerEvents: 'none', zIndex: 0 }}>
@@ -228,7 +277,7 @@ export default function LoggedInRegistration() {
                   <img src={avatarUrl || ''} alt="avatar" onError={(e) => { (e.currentTarget as HTMLImageElement).style.visibility = 'hidden'; }} style={{ boxSizing: 'border-box', width: 56, height: 56, minWidth: 56, border: '1px solid rgba(0,0,0,0.08)', borderRadius: 9999, objectFit: 'cover', background: 'rgba(255,255,255,0.08)' }} />
                   <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minWidth: 0, boxSizing: 'border-box' }}>
                     <div style={{ color: '#F7F7F7', fontWeight: 600, fontSize: 20, lineHeight: '30px', wordWrap: 'break-word' }}>Hi {displayName || 'player'}</div>
-                    <div style={{ color: '#94979C', fontSize: 16, lineHeight: '24px', wordWrap: 'break-word' }}>{email || 'Register for Ascend Leagues'}</div>
+                    <div style={{ color: '#94979C', fontSize: 16, lineHeight: '24px', wordWrap: 'break-word' }}>{'Register for Ascend Leagues'}</div>
                   </div>
                 </div>
               </div>
@@ -244,7 +293,7 @@ export default function LoggedInRegistration() {
                 </div>
                 <input value={riotId} onChange={(e) => setRiotId(e.target.value)} placeholder="Shroud#NA" style={{ width: '100%', height: 44, background: '#0C0E12', border: '1px solid #373A41', borderRadius: 8, color: '#FFFFFF', padding: '10px 14px', boxSizing: 'border-box' }} />
                 <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, color: '#94979C', fontSize: 12, cursor: 'pointer' }}>
-                  <input type="checkbox" checked={owns} onChange={(e) => setOwns(e.target.checked)} style={{ marginTop: 2, minWidth: 16 }} />
+                  <input type="checkbox" checked={owns} onChange={(e) => setOwns(e.target.checked)} style={{ marginTop: 2, minWidth: 16 }} required={true} />
                   <span>I confirm that I am the rightful owner of the Riot account submitted above</span>
                 </label>
               </div>
@@ -266,7 +315,7 @@ export default function LoggedInRegistration() {
                 </div>
 
                 <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, width: '100%', color: '#94979C', fontSize: 12, cursor: 'pointer', boxSizing: 'border-box' }}>
-                  <input type="checkbox" checked={agree} onChange={(e) => setAgree(e.target.checked)} style={{ marginTop: 2, minWidth: 16 }} />
+                  <input type="checkbox" checked={agree} onChange={(e) => setAgree(e.target.checked)} style={{ marginTop: 2, minWidth: 16 }} required={true} />
                   <span>I agree to follow and abide by the official <a href="#" style={{ color: '#A78BFA' }}>Ascend Leagues Rulebook</a></span>
                 </label>
 

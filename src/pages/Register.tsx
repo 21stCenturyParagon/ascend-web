@@ -15,11 +15,11 @@ export default function Register() {
   const { isTablet, headerMaxWidth } = useResponsiveLayout();
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', backgroundColor: '#0C0E12', position: 'relative' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', backgroundImage: 'url(/image.png)', position: 'relative' }}>
       <BrandHeader
         isTablet={isTablet}
         headerMaxWidth={headerMaxWidth}
-        backgroundImageUrl={'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="2" height="2"><rect width="2" height="2" fill="%230C0E12"/></svg>'}
+        backgroundImageUrl={'/image.png'}
       />
       {/* Gradient groups from Figma (rotated strips)
       <div style={{ position: 'absolute', width: 2809, height: 3233.41, left: 'calc(50% - 2809px/2 - 212.7px)', top: -473, transform: 'rotate(-90deg)', pointerEvents: 'none', zIndex: 0 }}>
