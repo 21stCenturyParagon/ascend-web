@@ -276,8 +276,8 @@ export default function LoggedInRegistration() {
                 <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'flex-start', gap: 12, width: '100%', boxSizing: 'border-box' }}>
                   <img src={avatarUrl || ''} alt="avatar" onError={(e) => { (e.currentTarget as HTMLImageElement).style.visibility = 'hidden'; }} style={{ boxSizing: 'border-box', width: 56, height: 56, minWidth: 56, border: '1px solid rgba(0,0,0,0.08)', borderRadius: 9999, objectFit: 'cover', background: 'rgba(255,255,255,0.08)' }} />
                   <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minWidth: 0, boxSizing: 'border-box' }}>
-                    <div style={{ color: '#F7F7F7', fontWeight: 600, fontSize: 20, lineHeight: '30px', wordWrap: 'break-word' }}>Hi {displayName || 'player'}</div>
-                    <div style={{ color: '#94979C', fontSize: 16, lineHeight: '24px', wordWrap: 'break-word' }}>{'Register for Ascend Leagues'}</div>
+                    <div style={{ color: '#F7F7F7', fontWeight: 600, fontSize: 20, lineHeight: '30px', wordWrap: 'break-word', fontFamily: '"IBM Plex Sans", system-ui, sans-serif' }}>Hi {displayName || 'player'}</div>
+                    <div style={{ color: '#94979C', fontSize: 16, lineHeight: '24px', wordWrap: 'break-word', fontFamily: '"IBM Plex Sans", system-ui, sans-serif' }}>{'Register for Ascend Leagues'}</div>
                   </div>
                 </div>
               </div>
@@ -286,13 +286,13 @@ export default function LoggedInRegistration() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: 16, width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                   <div style={{ display: 'flex', gap: 2, alignItems: 'center', height: 20 }}>
-                    <div style={{ color: '#CECFD2', fontWeight: 600, fontSize: 14, lineHeight: '20px' }}>Riot ID</div>
-                    <div style={{ color: '#94979C', fontWeight: 600, fontSize: 14, lineHeight: '20px' }}>*</div>
+                    <div style={{ color: '#CECFD2', fontWeight: 600, fontSize: 14, lineHeight: '20px', fontFamily: '"IBM Plex Sans", system-ui, sans-serif' }}>Riot ID</div>
+                    <div style={{ color: '#94979C', fontWeight: 600, fontSize: 14, lineHeight: '20px', fontFamily: '"IBM Plex Sans", system-ui, sans-serif' }}>*</div>
                   </div>
-                  <div style={{ color: '#94979C', fontSize: 14, lineHeight: '20px' }}>Note that your main account is required for higher approval chance.</div>
+                  <div style={{ color: '#94979C', fontSize: 14, lineHeight: '20px', fontFamily: '"IBM Plex Sans", system-ui, sans-serif' }}>Note that your main account is required for higher approval chance.</div>
                 </div>
-                <input value={riotId} onChange={(e) => setRiotId(e.target.value)} placeholder="Shroud#NA" style={{ width: '100%', height: 44, background: '#0C0E12', border: '1px solid #373A41', borderRadius: 8, color: '#FFFFFF', padding: '10px 14px', boxSizing: 'border-box' }} />
-                <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, color: '#94979C', fontSize: 12, cursor: 'pointer' }}>
+                <input value={riotId} onChange={(e) => setRiotId(e.target.value)} placeholder="Shroud#NA" style={{ width: '100%', height: 44, background: '#0C0E12', border: '1px solid #373A41', borderRadius: 8, color: '#FFFFFF', padding: '10px 14px', boxSizing: 'border-box', fontFamily: '"IBM Plex Sans", system-ui, sans-serif', fontSize: 16 }} />
+                <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, color: '#94979C', fontSize: 12, cursor: 'pointer', fontFamily: '"IBM Plex Sans", system-ui, sans-serif' }}>
                   <input type="checkbox" checked={owns} onChange={(e) => setOwns(e.target.checked)} style={{ marginTop: 2, minWidth: 16 }} required={true} />
                   <span>I confirm that I am the rightful owner of the Riot account submitted above</span>
                 </label>
@@ -300,28 +300,28 @@ export default function LoggedInRegistration() {
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: 16, width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                  <div style={{ color: '#F7F7F7', fontWeight: 600, fontSize: 20, lineHeight: '30px' }}>Socials</div>
-                  <div style={{ color: '#94979C', fontSize: 14, lineHeight: '20px' }}>Players receive bonus MMR if added and they stream matches.</div>
+                  <div style={{ color: '#F7F7F7', fontWeight: 600, fontSize: 20, lineHeight: '30px', fontFamily: '"IBM Plex Sans", system-ui, sans-serif' }}>Socials</div>
+                  <div style={{ color: '#94979C', fontSize: 14, lineHeight: '20px', fontFamily: '"IBM Plex Sans", system-ui, sans-serif' }}>Players receive bonus MMR if added and they stream matches.</div>
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8, width: '100%', boxSizing: 'border-box' }}>
-                  <div style={{ color: '#94979C', fontSize: 13 }}>X (Formerly Twitter)</div>
-                  <input value={twitter} onChange={(e) => setTwitter(e.target.value)} placeholder="X Username" style={{ width: '100%', height: 44, background: '#0C0E12', border: '1px solid #373A41', borderRadius: 8, color: '#FFFFFF', padding: '10px 14px', boxSizing: 'border-box' }} />
+                  <div style={{ color: '#94979C', fontSize: 13, fontFamily: '"IBM Plex Sans", system-ui, sans-serif' }}>X (Formerly Twitter)</div>
+                  <input value={twitter} onChange={(e) => setTwitter(e.target.value)} placeholder="X Username" style={{ width: '100%', height: 44, background: '#0C0E12', border: '1px solid #373A41', borderRadius: 8, color: '#FFFFFF', padding: '10px 14px', boxSizing: 'border-box', fontFamily: '"IBM Plex Sans", system-ui, sans-serif', fontSize: 16 }} />
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8, width: '100%', boxSizing: 'border-box' }}>
-                  <div style={{ color: '#94979C', fontSize: 13 }}>YouTube</div>
-                  <input value={youtube} onChange={(e) => setYoutube(e.target.value)} placeholder="YouTube Channel" style={{ width: '100%', height: 44, background: '#0C0E12', border: '1px solid #373A41', borderRadius: 8, color: '#FFFFFF', padding: '10px 14px', boxSizing: 'border-box' }} />
+                  <div style={{ color: '#94979C', fontSize: 13, fontFamily: '"IBM Plex Sans", system-ui, sans-serif' }}>YouTube</div>
+                  <input value={youtube} onChange={(e) => setYoutube(e.target.value)} placeholder="YouTube Channel" style={{ width: '100%', height: 44, background: '#0C0E12', border: '1px solid #373A41', borderRadius: 8, color: '#FFFFFF', padding: '10px 14px', boxSizing: 'border-box', fontFamily: '"IBM Plex Sans", system-ui, sans-serif', fontSize: 16 }} />
                 </div>
 
-                <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, width: '100%', color: '#94979C', fontSize: 12, cursor: 'pointer', boxSizing: 'border-box' }}>
+                <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, width: '100%', color: '#94979C', fontSize: 12, cursor: 'pointer', boxSizing: 'border-box', fontFamily: '"IBM Plex Sans", system-ui, sans-serif' }}>
                   <input type="checkbox" checked={agree} onChange={(e) => setAgree(e.target.checked)} style={{ marginTop: 2, minWidth: 16 }} required={true} />
                   <span>I agree to follow and abide by the official <a href="#" style={{ color: '#A78BFA' }}>Ascend Leagues Rulebook</a></span>
                 </label>
 
-                {error && <div role="alert" style={{ color: '#EF4444', width: '100%', boxSizing: 'border-box' }}>{error}</div>}
+                {error && <div role="alert" style={{ color: '#EF4444', width: '100%', boxSizing: 'border-box', fontFamily: '"IBM Plex Sans", system-ui, sans-serif', fontSize: 14 }}>{error}</div>}
 
-                <button type="submit" disabled={submitting} style={{ width: '100%', height: 40, background: '#7F56D9', boxShadow: 'inset 0px 0px 0px 1px rgba(12, 14, 18, 0.18), inset 0px -2px 0px rgba(12, 14, 18, 0.05)', borderRadius: 8, color: '#FFFFFF', fontWeight: 600, border: 'none', cursor: 'pointer', opacity: submitting ? 0.85 : 1, boxSizing: 'border-box' }}>
+                <button type="submit" disabled={submitting} style={{ width: '100%', height: 40, background: '#7F56D9', boxShadow: 'inset 0px 0px 0px 1px rgba(12, 14, 18, 0.18), inset 0px -2px 0px rgba(12, 14, 18, 0.05)', borderRadius: 8, color: '#FFFFFF', fontWeight: 600, border: 'none', cursor: 'pointer', opacity: submitting ? 0.85 : 1, boxSizing: 'border-box', fontFamily: '"IBM Plex Sans", system-ui, sans-serif', fontSize: 16 }}>
                   Submit
                 </button>
               </div>
