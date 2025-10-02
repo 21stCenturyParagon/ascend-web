@@ -1,0 +1,9 @@
+{
+  "rewrites": [
+    { "source": "/register", "destination": "/" },
+    { "source": "/register/details", "destination": "/" },
+    { "source": "/auth/callback", "destination": "/" }
+  ]
+}
+
+
