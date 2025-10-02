@@ -20,7 +20,9 @@ export function getSupabase(): SupabaseClient {
       auth: {
         autoRefreshToken: true,
         persistSession: true,
-        detectSessionInUrl: false,
+        // Enable PKCE flow and auto-detect session from callback URL
+        detectSessionInUrl: true,
+        flowType: 'pkce',
       },
     });
     return cachedClient;
@@ -46,6 +48,26 @@ export async function addToWaitlist(email: string): Promise<{ success: boolean; 
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error';
     return { success: false, error: `Unable to join waitlist. ${message}` };
+  }
+}
+
+// OAuth: start Discord sign-in using PKCE. Redirect back to /auth/callback
+export async function signInWithDiscord(redirectPath: string = '/auth/callback'): Promise<void> {
+  const client = getSupabase();
+  try {
+    const redirectOrigin = window.location.origin;
+    const { data, error } = await client.auth.signInWithOAuth({
+      provider: 'discord',
+      options: {
+        redirectTo: `${redirectOrigin}${redirectPath}`,
+      },
+    });
+    if (error) throw error;
+    // supabase-js handles the redirect. data.url may be present in some envs
+    if (data?.url) window.location.assign(data.url);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Unknown error starting Discord OAuth';
+    throw new Error(message);
   }
 }
 
