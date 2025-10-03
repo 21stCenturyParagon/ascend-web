@@ -104,19 +104,20 @@ export default function AdminReview() {
         .update(payload)
         .eq('id', registrationId);
       if (upErr) throw upErr as unknown as Error;
-      // Notify player and assign role if approved
+      // Notify player and assign role if approved (via Supabase invoke to avoid CORS)
       try {
-        await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/moderation-notify`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}` },
-          body: JSON.stringify({
+        const { error: fnError } = await client.functions.invoke('moderation-notify', {
+          body: {
             id: registrationId,
             status,
             reason: status === 'rejected' ? (reason || null) : null,
             display_name: data.display_name || null,
             discord_user_id: data.discord_user_id || null,
-          }),
+          },
         });
+        if (fnError) {
+          console.error('moderation-notify error:', fnError);
+        }
       } catch (e) {
         console.error('Notify/role assign failed:', e);
       }
