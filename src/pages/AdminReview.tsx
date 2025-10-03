@@ -40,15 +40,12 @@ export default function AdminReview() {
         const { data: sessionData } = await client.auth.getSession();
         if (!sessionData.session) {
           // Store return URL in sessionStorage for AuthCallback to use
-          const returnUrl = window.location.href;
-          console.log('AdminReview - Storing return URL:', returnUrl);
           try {
-            sessionStorage.setItem('auth_return_url', returnUrl);
+            sessionStorage.setItem('auth_return_url', window.location.href);
           } catch (e) {
             console.error('Failed to store return URL:', e);
           }
-          const ret = encodeURIComponent(returnUrl);
-          console.log('AdminReview - Redirecting to:', `/register?next=${ret}`);
+          const ret = encodeURIComponent(window.location.href);
           window.location.replace(`/register?next=${ret}`);
           return;
         }
