@@ -6,19 +6,28 @@ export default function AuthCallback() {
 
   function getReturnUrl(): string {
     try {
+      // Debug: log what we have
+      console.log('AuthCallback - Current URL:', window.location.href);
+      console.log('AuthCallback - SessionStorage auth_return_url:', sessionStorage.getItem('auth_return_url'));
+      
       // Check if there's a stored return URL in sessionStorage
       const stored = sessionStorage.getItem('auth_return_url');
       if (stored) {
+        console.log('AuthCallback - Using stored URL:', stored);
         sessionStorage.removeItem('auth_return_url');
         return stored;
       }
       // Fallback: read from URL query param 'next'
       const u = new URL(window.location.href);
       const nextParam = u.searchParams.get('next');
-      if (nextParam) return nextParam;
-    } catch {
-      // Ignore storage errors
+      if (nextParam) {
+        console.log('AuthCallback - Using next param:', nextParam);
+        return nextParam;
+      }
+    } catch (e) {
+      console.error('AuthCallback - Error getting return URL:', e);
     }
+    console.log('AuthCallback - Using default: /register/details');
     return '/register/details';
   }
 

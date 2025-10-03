@@ -60,10 +60,20 @@ export default function Register() {
                     const nextParam = u.searchParams.get('next');
                     const stored = sessionStorage.getItem('auth_return_url');
                     ret = stored || nextParam || ret;
+                    
+                    console.log('Register - URL next param:', nextParam);
+                    console.log('Register - SessionStorage auth_return_url:', stored);
+                    console.log('Register - Final return URL:', ret);
                   } catch {
                     // ignore
                   }
+                  
+                  // Make sure to store the return URL in sessionStorage
+                  sessionStorage.setItem('auth_return_url', ret);
+                  
                   const cb = `${window.location.origin}/auth/callback?next=${encodeURIComponent(ret)}`;
+                  console.log('Register - Callback URL for Discord:', cb);
+                  
                   await signInWithDiscord(cb);
                 } catch (e) {
                   const msg = e instanceof Error ? e.message : 'Unknown error';
