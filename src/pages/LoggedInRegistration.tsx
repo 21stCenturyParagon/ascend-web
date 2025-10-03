@@ -112,6 +112,13 @@ export default function LoggedInRegistration() {
       }
       
       setApplicationSubmitted(true);
+      // Logout user after successful application submission
+      try {
+        const client = getSupabase();
+        await client.auth.signOut();
+      } catch (e) {
+        console.error('Sign out failed after submission:', e);
+      }
     } catch (e) {
       const msg = e instanceof Error ? e.message : 'Unknown error';
       setError(msg);
