@@ -105,6 +105,8 @@ export default function LoggedInRegistration() {
             twitter: twitter || null,
             youtube: youtube || null,
             userId: user.id,
+            displayName: (user.user_metadata as Record<string, unknown>)?.['full_name'] as string || (user.user_metadata as Record<string, unknown>)?.['name'] as string || null,
+            discordUserId: (user.user_metadata as Record<string, unknown>)?.['provider_id'] as string || (user.user_metadata as Record<string, unknown>)?.['sub'] as string || null,
           });
         }
       } catch (e) {

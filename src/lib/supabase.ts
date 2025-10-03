@@ -172,6 +172,8 @@ export async function queueRegistrationForModeration(payload: {
   twitter?: string | null;
   youtube?: string | null;
   userId: string;
+  displayName?: string | null;
+  discordUserId?: string | null;
 }): Promise<{ success: boolean; error?: string }> {
   try {
     const url = getRequiredEnv('VITE_SUPABASE_URL');
@@ -185,6 +187,8 @@ export async function queueRegistrationForModeration(payload: {
         twitter: payload.twitter ?? null,
         youtube: payload.youtube ?? null,
         user_id: payload.userId,
+        display_name: payload.displayName ?? null,
+        discord_user_id: payload.discordUserId ?? null,
       }),
     });
     if (!res.ok) {
