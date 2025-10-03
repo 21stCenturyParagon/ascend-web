@@ -116,8 +116,8 @@ export default function AdminReview() {
               <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'flex-start', gap: 12, width: '100%', boxSizing: 'border-box' }}>
                 <img src={data?.avatar_url || ''} alt="avatar" onError={(e) => { (e.currentTarget as HTMLImageElement).style.visibility = 'hidden'; }} style={{ boxSizing: 'border-box', width: 56, height: 56, minWidth: 56, border: '1px solid rgba(0,0,0,0.08)', borderRadius: 9999, objectFit: 'cover', background: 'rgba(255,255,255,0.08)' }} />
                 <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minWidth: 0, boxSizing: 'border-box' }}>
-                  <div style={{ color: '#F7F7F7', fontWeight: 600, fontSize: 20, lineHeight: '30px', wordWrap: 'break-word', fontFamily: '"IBM Plex Sans", system-ui, sans-serif' }}>Hi {data?.display_name || 'player'}</div>
-                  <div style={{ color: '#94979C', fontSize: 16, lineHeight: '24px', wordWrap: 'break-word', fontFamily: '"IBM Plex Sans", system-ui, sans-serif' }}>{'Register for Ascend Leagues'}</div>
+                  <div style={{ color: '#F7F7F7', fontWeight: 600, fontSize: 20, lineHeight: '30px', wordWrap: 'break-word', fontFamily: '"IBM Plex Sans", system-ui, sans-serif' }}>{data?.display_name || 'player'}</div>
+                  <div style={{ color: '#94979C', fontSize: 16, lineHeight: '24px', wordWrap: 'break-word', fontFamily: '"IBM Plex Sans", system-ui, sans-serif' }}>{'Registered for Ascend Leagues'}</div>
                 </div>
               </div>
               {loading && <div>Loading…</div>}
