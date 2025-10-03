@@ -56,10 +56,12 @@ export async function signInWithDiscord(redirectPath: string = '/auth/callback')
   const client = getSupabase();
   try {
     const redirectOrigin = window.location.origin;
+    const isAbsolute = /^https?:\/\//i.test(redirectPath);
+    const redirectTo = isAbsolute ? redirectPath : `${redirectOrigin}${redirectPath}`;
     const { data, error } = await client.auth.signInWithOAuth({
       provider: 'discord',
       options: {
-        redirectTo: `${redirectOrigin}${redirectPath}`,
+        redirectTo,
         scopes: 'identify email guilds',
       },
     });
