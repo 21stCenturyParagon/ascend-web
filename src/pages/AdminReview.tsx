@@ -52,7 +52,7 @@ export default function AdminReview() {
             console.error('Failed to store return URL:', e);
           }
           const ret = encodeURIComponent(window.location.href);
-          window.location.replace(`/register?next=${ret}`);
+          window.location.replace(`/admin/login?next=${ret}`);
           return;
         }
         // Role check: must be admin
