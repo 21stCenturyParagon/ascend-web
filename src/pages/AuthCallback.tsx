@@ -4,6 +4,20 @@ import { getSupabase } from '../lib/supabase';
 export default function AuthCallback() {
   const [error, setError] = useState<string | null>(null);
 
+  function getReturnUrl(): string {
+    try {
+      // Check if there's a stored return URL in sessionStorage
+      const stored = sessionStorage.getItem('auth_return_url');
+      if (stored) {
+        sessionStorage.removeItem('auth_return_url');
+        return stored;
+      }
+    } catch {
+      // Ignore storage errors
+    }
+    return '/register/details';
+  }
+
   useEffect(() => {
     let cancelled = false;
     const client = getSupabase();
@@ -11,7 +25,7 @@ export default function AuthCallback() {
     const { data: sub } = client.auth.onAuthStateChange((_event, session) => {
       if (cancelled) return;
       if (session) {
-        window.location.replace('/register/details');
+        window.location.replace(getReturnUrl());
       }
     });
     // Fallback: after a brief delay, check if session exists; if not, surface an error
@@ -21,7 +35,7 @@ export default function AuthCallback() {
         const { data, error: getErr } = await client.auth.getSession();
         if (getErr) throw getErr;
         if (data.session) {
-          window.location.replace('/register/details');
+          window.location.replace(getReturnUrl());
         } else {
           setError('Authentication did not complete. Please try again.');
         }

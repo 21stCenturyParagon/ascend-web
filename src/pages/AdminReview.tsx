@@ -39,9 +39,13 @@ export default function AdminReview() {
         // Require auth
         const { data: sessionData } = await client.auth.getSession();
         if (!sessionData.session) {
-          // Redirect to login via Discord preserving return url
-          const ret = encodeURIComponent(window.location.href);
-          window.location.replace(`/register?next=${ret}`);
+          // Store return URL in sessionStorage for AuthCallback to use
+          try {
+            sessionStorage.setItem('auth_return_url', window.location.href);
+          } catch (e) {
+            console.error('Failed to store return URL:', e);
+          }
+          window.location.replace('/register');
           return;
         }
         // Role check: must be admin
