@@ -39,7 +39,7 @@ export default function AuthCallback() {
       if (session) {
         const url = getReturnUrl();
         console.log('AuthCallback - Redirecting to:', url);
-        await new Promise(r => setTimeout(r, 10000)); // 10 second delay
+        // await new Promise(r => setTimeout(r, 10000)); // 10 second delay
         window.location.replace(url);
       }
     });
