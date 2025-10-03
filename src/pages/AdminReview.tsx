@@ -145,7 +145,7 @@ export default function AdminReview() {
 
                     <div style={{ color: '#94979C', fontSize: 14 }}>Status: {data.status}{(data as any).reviewed_by ? ' • Locked' : ''}</div>
 
-                    <div style={{ display: 'flex', gap: 12, width: '100%', maxWidth: 473 }}>
+                    <div style={{ display: 'flex', gap: 12, width: '100%', maxWidth: '100%' }}>
                       <button onClick={() => updateStatus('approved')} disabled={loading || data.status !== 'pending'} style={{ flex: 1, height: 40, background: '#10B981', borderRadius: 8, color: '#FFFFFF', fontWeight: 600, border: 'none', cursor: data.status === 'pending' ? 'pointer' : 'not-allowed' }}>Approve</button>
                       <button type="button" onClick={() => setShowReject(true)} disabled={loading || data.status !== 'pending'} style={{ flex: 1, height: 40, background: '#EF4444', borderRadius: 8, color: '#FFFFFF', fontWeight: 600, border: 'none', cursor: data.status === 'pending' ? 'pointer' : 'not-allowed' }}>Reject</button>
                     </div>
