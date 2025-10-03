@@ -150,7 +150,7 @@ export default function AdminReview() {
                     </div>
 
                     {data.status !== 'pending' ? (
-                      <div style={{ width: '100%', border: '1px solid #373A41', borderRadius: 12, padding: 16, background: '#0C0E12' }}>
+                      <div style={{ width: '100%', maxWidth: '100%', alignSelf: 'stretch', boxSizing: 'border-box', border: '1px solid #373A41', borderRadius: 12, padding: 16, background: '#0C0E12' }}>
                         <div style={{ color: data.status === 'approved' ? '#10B981' : '#EF4444', fontWeight: 700, fontSize: 18, marginBottom: 8 }}>
                           {data.status === 'approved' ? 'Application Approved' : 'Application Rejected'}
                         </div>
