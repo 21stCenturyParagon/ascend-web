@@ -103,6 +103,22 @@ export default function AdminReview() {
         .update(payload)
         .eq('id', registrationId);
       if (upErr) throw upErr as unknown as Error;
+      // Notify player and assign role if approved
+      try {
+        await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/moderation-notify`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}` },
+          body: JSON.stringify({
+            id: registrationId,
+            status,
+            reason: status === 'rejected' ? (reason || null) : null,
+            display_name: data.display_name || null,
+            discord_user_id: (data as unknown as { discord_user_id?: string }).discord_user_id || null,
+          }),
+        });
+      } catch (e) {
+        console.error('Notify/role assign failed:', e);
+      }
       setData((d) => (d ? { ...d, status, review_reason: status === 'rejected' ? (reason || null) : d.review_reason, reviewed_by: reviewer, reviewed_by_name: reviewerName, approved_at: status === 'approved' ? new Date().toISOString() : d.approved_at } : d));
       setShowReject(false);
     } catch (e) {

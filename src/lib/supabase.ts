@@ -133,6 +133,9 @@ export async function savePlayerRegistration(data: {
     if (userError) throw userError;
     if (!user) throw new Error('User not authenticated');
 
+    // Capture Discord user id for later notifications/role assignment if available
+    const discordUserId = (user.user_metadata as Record<string, unknown>)?.['provider_id'] as string || (user.user_metadata as Record<string, unknown>)?.['sub'] as string || null;
+
     const { data: inserted, error: insertError } = await client
       .from('player_registrations')
       .insert([{
@@ -143,6 +146,7 @@ export async function savePlayerRegistration(data: {
       owns_account: data.ownsAccount,
       display_name: (user.user_metadata as Record<string, unknown>)?.['full_name'] as string || (user.user_metadata as Record<string, unknown>)?.['name'] as string || null,
       avatar_url: (user.user_metadata as Record<string, unknown>)?.['avatar_url'] as string || null,
+      discord_user_id: discordUserId,
       created_at: new Date().toISOString(),
     }])
       .select('id')
