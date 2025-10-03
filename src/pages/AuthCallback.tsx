@@ -33,14 +33,21 @@ export default function AuthCallback() {
   useEffect(() => {
     let cancelled = false;
     const client = getSupabase();
+    
+    async function handleAuthComplete() {
+      if (cancelled) return;
+      const url = getReturnUrl();
+      console.log('AuthCallback - Redirecting to:', url);
+      // Small delay to ensure state is committed
+      await new Promise(r => setTimeout(r, 100));
+      window.location.replace(url);
+    }
+    
     // Supabase will auto-detect the code in the URL and exchange for a session (PKCE)
-    const { data: sub } = client.auth.onAuthStateChange(async (_event, session) => {
+    const { data: sub } = client.auth.onAuthStateChange((_event, session) => {
       if (cancelled) return;
       if (session) {
-        const url = getReturnUrl();
-        console.log('AuthCallback - Redirecting to:', url);
-        await new Promise(r => setTimeout(r, 3000)); // 10 second delay
-        window.location.replace(url);
+        handleAuthComplete();
       }
     });
     // Fallback: after a brief delay, check if session exists; if not, surface an error
@@ -50,10 +57,7 @@ export default function AuthCallback() {
         const { data, error: getErr } = await client.auth.getSession();
         if (getErr) throw getErr;
         if (data.session) {
-          const url = getReturnUrl();
-          console.log('AuthCallback - Redirecting to (fallback):', url);
-          await new Promise(r => setTimeout(r, 10000)); // 10 second delay
-          window.location.replace(url);
+          await handleAuthComplete();
         } else {
           setError('Authentication did not complete. Please try again.');
         }
