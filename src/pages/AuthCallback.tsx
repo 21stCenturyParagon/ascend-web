@@ -12,6 +12,10 @@ export default function AuthCallback() {
         sessionStorage.removeItem('auth_return_url');
         return stored;
       }
+      // Fallback: read from URL query param 'next'
+      const u = new URL(window.location.href);
+      const nextParam = u.searchParams.get('next');
+      if (nextParam) return nextParam;
     } catch {
       // Ignore storage errors
     }
