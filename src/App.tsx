@@ -3,6 +3,7 @@ import Landing from './pages/Landing';
 import Register from './pages/Register';
 import AuthCallback from './pages/AuthCallback';
 import LoggedInRegistration from './pages/LoggedInRegistration';
+import AdminReview from './pages/AdminReview';
 
 function getPath(): string {
   try {
@@ -17,5 +18,6 @@ export default function App() {
   if (path === '/auth/callback') return <AuthCallback />;
   if (path === '/register/details') return <LoggedInRegistration />;
   if (path === '/register') return <Register />;
+  if (path.startsWith('/admin/review')) return <AdminReview />;
   return <Landing />;
 }
