@@ -34,10 +34,13 @@ export default function AuthCallback() {
     let cancelled = false;
     const client = getSupabase();
     // Supabase will auto-detect the code in the URL and exchange for a session (PKCE)
-    const { data: sub } = client.auth.onAuthStateChange((_event, session) => {
+    const { data: sub } = client.auth.onAuthStateChange(async (_event, session) => {
       if (cancelled) return;
       if (session) {
-        window.location.replace(getReturnUrl());
+        const url = getReturnUrl();
+        console.log('AuthCallback - Redirecting to:', url);
+        await new Promise(r => setTimeout(r, 10000)); // 10 second delay
+        window.location.replace(url);
       }
     });
     // Fallback: after a brief delay, check if session exists; if not, surface an error
@@ -47,7 +50,10 @@ export default function AuthCallback() {
         const { data, error: getErr } = await client.auth.getSession();
         if (getErr) throw getErr;
         if (data.session) {
-          window.location.replace(getReturnUrl());
+          const url = getReturnUrl();
+          console.log('AuthCallback - Redirecting to (fallback):', url);
+          await new Promise(r => setTimeout(r, 10000)); // 10 second delay
+          window.location.replace(url);
         } else {
           setError('Authentication did not complete. Please try again.');
         }
