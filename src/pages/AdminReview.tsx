@@ -12,6 +12,9 @@ type ReviewData = {
   review_reason: string | null;
   display_name?: string | null;
   avatar_url?: string | null;
+  reviewed_by?: string | null;
+  reviewed_by_name?: string | null;
+  approved_at?: string | null;
 };
 
 export default function AdminReview() {
@@ -60,7 +63,7 @@ export default function AdminReview() {
         // Load registration
         const { data: reg, error: regErr } = await client
           .from('player_registrations')
-          .select('id, riot_id, twitter, youtube, status, review_reason, approved_at, reviewed_by, display_name, avatar_url')
+          .select('id, riot_id, twitter, youtube, status, review_reason, approved_at, reviewed_by, reviewed_by_name, display_name, avatar_url')
           .eq('id', registrationId)
           .single();
         if (regErr) throw regErr as unknown as Error;
@@ -85,19 +88,22 @@ export default function AdminReview() {
       setLoading(true);
       const payload: Partial<ReviewData> = { status };
       if (status === 'approved') {
-        (payload as any).approved_at = new Date().toISOString();
+        (payload as Partial<ReviewData> & { approved_at?: string }).approved_at = new Date().toISOString();
       } else {
-        (payload as any).review_reason = reason || null;
+        (payload as Partial<ReviewData> & { review_reason?: string | null }).review_reason = reason || null;
       }
       const { data: sessionData } = await client.auth.getSession();
       const reviewer = sessionData.session?.user?.id || null;
-      (payload as any).reviewed_by = reviewer;
+      const md = (sessionData.session?.user?.user_metadata || {}) as Record<string, unknown>;
+      const reviewerName = (md['user_name'] as string) || (md['full_name'] as string) || (md['name'] as string) || sessionData.session?.user?.email || null;
+      (payload as Partial<ReviewData> & { reviewed_by?: string | null }).reviewed_by = reviewer;
+      (payload as Partial<ReviewData> & { reviewed_by_name?: string | null }).reviewed_by_name = reviewerName;
       const { error: upErr } = await client
         .from('player_registrations')
         .update(payload)
         .eq('id', registrationId);
       if (upErr) throw upErr as unknown as Error;
-      setData((d) => (d ? { ...d, status, review_reason: status === 'rejected' ? (reason || null) : d.review_reason } as ReviewData : d));
+      setData((d) => (d ? { ...d, status, review_reason: status === 'rejected' ? (reason || null) : d.review_reason, reviewed_by: reviewer, reviewed_by_name: reviewerName, approved_at: status === 'approved' ? new Date().toISOString() : d.approved_at } : d));
       setShowReject(false);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Unknown error');
@@ -143,12 +149,27 @@ export default function AdminReview() {
                       <input value={data.youtube || ''} readOnly placeholder="YouTube Channel" style={{ width: '100%', height: 44, background: '#0C0E12', border: '1px solid #373A41', borderRadius: 8, color: '#FFFFFF', padding: '10px 14px', boxSizing: 'border-box' }} />
                     </div>
 
-                    <div style={{ color: '#94979C', fontSize: 14 }}>Status: {data.status}{(data as any).reviewed_by ? ' • Locked' : ''}</div>
-
-                    <div style={{ display: 'flex', gap: 12, width: '100%', maxWidth: '100%' }}>
-                      <button onClick={() => updateStatus('approved')} disabled={loading || data.status !== 'pending'} style={{ flex: 1, height: 40, background: '#10B981', borderRadius: 8, color: '#FFFFFF', fontWeight: 600, border: 'none', cursor: data.status === 'pending' ? 'pointer' : 'not-allowed' }}>Approve</button>
-                      <button type="button" onClick={() => setShowReject(true)} disabled={loading || data.status !== 'pending'} style={{ flex: 1, height: 40, background: '#EF4444', borderRadius: 8, color: '#FFFFFF', fontWeight: 600, border: 'none', cursor: data.status === 'pending' ? 'pointer' : 'not-allowed' }}>Reject</button>
-                    </div>
+                    {data.status !== 'pending' ? (
+                      <div style={{ width: '100%', border: '1px solid #373A41', borderRadius: 12, padding: 16, background: '#0C0E12' }}>
+                        <div style={{ color: data.status === 'approved' ? '#10B981' : '#EF4444', fontWeight: 700, fontSize: 18, marginBottom: 8 }}>
+                          {data.status === 'approved' ? 'Application Approved' : 'Application Rejected'}
+                        </div>
+                        <div style={{ color: '#94979C', fontSize: 14, marginBottom: 6 }}>
+                          Reviewed by {data.reviewed_by_name || 'moderator'}
+                        </div>
+                        {data.status === 'rejected' && (
+                          <div style={{ color: '#94979C', fontSize: 14 }}>Reason: {data.review_reason || '—'}</div>
+                        )}
+                      </div>
+                    ) : (
+                      <>
+                        <div style={{ color: '#94979C', fontSize: 14 }}>Status: {data.status}</div>
+                        <div style={{ display: 'flex', gap: 12, width: '100%', maxWidth: '100%' }}>
+                          <button onClick={() => updateStatus('approved')} disabled={loading || data.status !== 'pending'} style={{ flex: 1, height: 40, background: '#10B981', borderRadius: 8, color: '#FFFFFF', fontWeight: 600, border: 'none', cursor: data.status === 'pending' ? 'pointer' : 'not-allowed' }}>Approve</button>
+                          <button type="button" onClick={() => setShowReject(true)} disabled={loading || data.status !== 'pending'} style={{ flex: 1, height: 40, background: '#EF4444', borderRadius: 8, color: '#FFFFFF', fontWeight: 600, border: 'none', cursor: data.status === 'pending' ? 'pointer' : 'not-allowed' }}>Reject</button>
+                        </div>
+                      </>
+                    )}
                   </div>
 
                   {showReject && (
