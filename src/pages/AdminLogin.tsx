@@ -20,12 +20,14 @@ export default function AdminLogin() {
       const u = new URL(window.location.href);
       const next = u.searchParams.get('next');
       if (next) sessionStorage.setItem('auth_return_url', next);
-    } catch {}
+    } catch {
+      // Ignore URL parsing errors
+    }
   }, []);
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', backgroundImage: 'url(/image.png)', position: 'relative' }}>
-      <BrandHeader isTablet={isTablet} headerMaxWidth={headerMaxWidth} backgroundImageUrl={'/image.png'} />
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', backgroundColor: '#0C0E12', position: 'relative' }}>
+      <BrandHeader isTablet={isTablet} headerMaxWidth={headerMaxWidth} />
       <main style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', paddingLeft: 24, paddingRight: 24, position: 'relative', zIndex: 1 }}>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '48px 0px', gap: 40, width: '100%', maxWidth: headerMaxWidth, background: 'transparent', boxSizing: 'border-box' }}>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: 0, gap: 24, width: '100%' }}>

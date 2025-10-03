@@ -4,7 +4,6 @@ import WebGLGlassHeader from './WebGLGlassHeader';
 type BrandHeaderProps = {
   isTablet: boolean;
   headerMaxWidth: number;
-  backgroundImageUrl?: string;
 };
 
 const LogoSVG: React.FC<{ style?: React.CSSProperties }> = ({ style }) => (
@@ -39,10 +38,10 @@ const LinkedInSVG: React.FC<{ size?: number }> = ({ size = 21 }) => (
   </svg>
 );
 
-export default function BrandHeader({ isTablet, headerMaxWidth, backgroundImageUrl = '/resized_1920x1080.png' }: BrandHeaderProps) {
+export default function BrandHeader({ isTablet, headerMaxWidth }: BrandHeaderProps) {
   return (
     <header style={{ paddingTop: 44, paddingLeft: isTablet ? 80 : 24, paddingRight: isTablet ? 80 : 24, paddingBottom: 0, display: 'flex', justifyContent: 'center' }}>
-      <WebGLGlassHeader width={headerMaxWidth} height={isTablet ? 84 : 64} backgroundImageUrl={backgroundImageUrl}>
+      <WebGLGlassHeader width={headerMaxWidth} height={isTablet ? 84 : 64}>
         <div style={{ paddingLeft: isTablet ? 40 : 20, paddingRight: isTablet ? 40 : 20, paddingTop: isTablet ? 12 : 8, paddingBottom: isTablet ? 12 : 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', maxWidth: headerMaxWidth, overflow: 'hidden' }}>
           <LogoSVG style={{ width: isTablet ? 156 : 120, height: isTablet ? 22 : 17 }} />
           <div style={{ display: 'flex', gap: isTablet ? 24 : 16, alignItems: 'center' }}>

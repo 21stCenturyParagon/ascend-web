@@ -131,8 +131,8 @@ export default function AdminReview() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundImage: 'url(/image.png)', position: 'relative', overflow: 'hidden' }}>
-      <BrandHeader isTablet={isTablet} headerMaxWidth={headerMaxWidth} backgroundImageUrl={'/image.png'} />
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: '#0C0E12', position: 'relative', overflow: 'hidden' }}>
+      <BrandHeader isTablet={isTablet} headerMaxWidth={headerMaxWidth} />
       <main style={{ flex: 1, position: 'relative', zIndex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px', width: '100%', boxSizing: 'border-box' }}>
         <form style={{ width: '100%', maxWidth: headerMaxWidth, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '24px 0px', gap: 40, background: 'transparent', color: '#CECFD2', fontFamily: '"IBM Plex Sans", system-ui, sans-serif', boxSizing: 'border-box' }} onSubmit={(e) => e.preventDefault()}>
           <section style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 32, width: '100%', boxSizing: 'border-box' }}>

@@ -86,8 +86,8 @@ export default function Landing() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', backgroundImage: 'url(/image.png)', backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}>
-      <BrandHeader isTablet={isTablet} headerMaxWidth={headerMaxWidth} backgroundImageUrl={'/image.png'} />
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', backgroundColor: '#0C0E12' }}>
+      <BrandHeader isTablet={isTablet} headerMaxWidth={headerMaxWidth} />
 
       <main style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', paddingLeft: 24, paddingRight: 24, paddingTop: 0, position: 'relative', zIndex: 1 }}>
         <div style={{ textAlign: 'center' }}>
@@ -106,7 +106,6 @@ export default function Landing() {
           <WebGLGlassHeader
             width={isDesktopXL ? 700 : isDesktop ? 640 : isTablet ? 685 : 500}
             height={isDesktop ? 64 : isTablet ? 72 : 56}
-            backgroundImageUrl={'/image.png'}
           >
           <form onSubmit={onSubmit} style={{ background: 'transparent', borderRadius: 60, display: 'flex', width: '100%', maxWidth: isDesktopXL ? 700 : isDesktop ? 640 : isTablet ? 685 : 500, height: isDesktop ? 64 : isTablet ? 72 : 56, paddingLeft: isDesktop ? 24 : isTablet ? 22 : 16, paddingRight: 4, alignItems: 'center' }}>
             <input

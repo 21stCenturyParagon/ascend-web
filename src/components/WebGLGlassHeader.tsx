@@ -4,7 +4,6 @@ type WebGLGlassHeaderProps = {
   children: React.ReactNode;
   width?: number;
   height?: number;
-  backgroundImageUrl?: string;
 };
 
 const vertexShaderSource = `
@@ -106,7 +105,7 @@ const fragmentShaderSource = `
   }
 `;
 
-export default function WebGLGlassHeader({ children, width = 400, height = 80, backgroundImageUrl }: WebGLGlassHeaderProps) {
+export default function WebGLGlassHeader({ children, width = 400, height = 80 }: WebGLGlassHeaderProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const glRef = useRef<WebGLRenderingContext | null>(null);
   const programRef = useRef<WebGLProgram | null>(null);
@@ -168,45 +167,24 @@ export default function WebGLGlassHeader({ children, width = 400, height = 80, b
     gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
     const texture = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, texture);
-    // Load the page background image (from prop or body CSS background)
-    let url = backgroundImageUrl;
-    if (!url) {
-      try {
-        const computed = window.getComputedStyle(document.body);
-        const bg = computed.backgroundImage;
-        if (bg && bg.startsWith('url(')) {
-          url = bg.slice(4, -1).replace(/"/g, '');
-        }
-      } catch {
-        // ignore
-      }
+    
+    try {
+      // Create a solid color texture from the background color #0C0E12
+      const solidColor = new Uint8Array([12, 14, 18, 255]); // #0C0E12 in RGBA
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, solidColor);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      backgroundTextureRef.current = texture;
+      gl.uniform1i(gl.getUniformLocation(program, 'u_background'), 0);
+      gl.uniform1f(gl.getUniformLocation(program, 'u_dpr'), window.devicePixelRatio || 1);
+      gl.enable(gl.BLEND);
+      gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+    } catch (e) {
+      console.error('Failed to create background texture', e);
     }
-    if (!url) url = '/resized_1920x1080.png';
-
-    const image = new Image();
-    image.crossOrigin = 'anonymous';
-    image.onload = () => {
-      try {
-        gl.bindTexture(gl.TEXTURE_2D, texture);
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-        backgroundTextureRef.current = texture;
-        gl.uniform1i(gl.getUniformLocation(program, 'u_background'), 0);
-        gl.uniform1f(gl.getUniformLocation(program, 'u_dpr'), window.devicePixelRatio || 1);
-        gl.enable(gl.BLEND);
-        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-      } catch (e) {
-        console.error('Failed to upload background to texture', e);
-      }
-    };
-    image.onerror = () => {
-      console.error('Failed to load background image for refraction:', url);
-    };
-    image.src = url;
-  }, [compileShader, backgroundImageUrl]);
+  }, [compileShader]);
 
   const render = useCallback(() => {
     const canvas = canvasRef.current;
