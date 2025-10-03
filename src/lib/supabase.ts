@@ -9,6 +9,15 @@ function getRequiredEnv(name: string): string {
   return value;
 }
 
+function getSiteOrigin(): string {
+  try {
+    const site = (import.meta.env.VITE_SITE_ORIGIN as unknown as string | undefined) || window.location.origin;
+    return site.replace(/\/$/, '');
+  } catch {
+    return 'http://localhost:5173';
+  }
+}
+
 let cachedClient: SupabaseClient | null = null;
 
 export function getSupabase(): SupabaseClient {
@@ -55,9 +64,10 @@ export async function addToWaitlist(email: string): Promise<{ success: boolean; 
 export async function signInWithDiscord(redirectPath: string = '/auth/callback'): Promise<void> {
   const client = getSupabase();
   try {
-    const redirectOrigin = window.location.origin;
+    const siteOrigin = getSiteOrigin();
     const isAbsolute = /^https?:\/\//i.test(redirectPath);
-    const redirectTo = isAbsolute ? redirectPath : `${redirectOrigin}${redirectPath}`;
+    const normalizedPath = redirectPath.startsWith('/') ? redirectPath : `/${redirectPath}`;
+    const redirectTo = isAbsolute ? redirectPath : `${siteOrigin}${normalizedPath}`;
     const { data, error } = await client.auth.signInWithOAuth({
       provider: 'discord',
       options: {

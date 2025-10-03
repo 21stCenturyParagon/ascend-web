@@ -63,7 +63,8 @@ export default function Register() {
                   } catch {
                     // ignore
                   }
-                  const cb = `${window.location.origin}/auth/callback?next=${encodeURIComponent(ret)}`;
+                  const site: string = window.location?.origin || 'http://localhost:5173';
+                  const cb = `${site.replace(/\/$/, '')}/auth/callback?next=${encodeURIComponent(ret)}`;
                   await signInWithDiscord(cb);
                 } catch (e) {
                   const msg = e instanceof Error ? e.message : 'Unknown error';

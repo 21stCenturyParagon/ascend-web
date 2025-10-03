@@ -8,39 +8,39 @@ export default function AuthCallback() {
     try {
       // Check if there's a stored return URL in sessionStorage
       const stored = sessionStorage.getItem('auth_return_url');
+      console.log('AuthCallback - sessionStorage auth_return_url:', stored);
       if (stored) {
         sessionStorage.removeItem('auth_return_url');
+        console.log('AuthCallback - Using stored URL:', stored);
         return stored;
       }
       // Fallback: read from URL query param 'next'
       const u = new URL(window.location.href);
       const nextParam = u.searchParams.get('next');
+      console.log('AuthCallback - URL next param:', nextParam);
+      console.log('AuthCallback - Full callback URL:', window.location.href);
       if (nextParam) {
+        console.log('AuthCallback - Using next param:', nextParam);
         return nextParam;
       }
     } catch (e) {
       console.error('AuthCallback - Error reading return URL:', e);
     }
+    console.log('AuthCallback - Using default: /register/details');
     return '/register/details';
   }
 
   useEffect(() => {
     let cancelled = false;
     const client = getSupabase();
-    
-    async function handleRedirect() {
-      if (cancelled) return;
-      // Small delay to ensure sessionStorage is fully readable after page load
-      await new Promise(r => setTimeout(r, 100));
-      const url = getReturnUrl();
-      window.location.replace(url);
-    }
-    
     // Supabase will auto-detect the code in the URL and exchange for a session (PKCE)
-    const { data: sub } = client.auth.onAuthStateChange((_event, session) => {
+    const { data: sub } = client.auth.onAuthStateChange(async (_event, session) => {
       if (cancelled) return;
       if (session) {
-        handleRedirect();
+        const url = getReturnUrl();
+        console.log('AuthCallback - Redirecting to:', url);
+        await new Promise(r => setTimeout(r, 300));
+        window.location.replace(url);
       }
     });
     // Fallback: after a brief delay, check if session exists; if not, surface an error
@@ -50,7 +50,10 @@ export default function AuthCallback() {
         const { data, error: getErr } = await client.auth.getSession();
         if (getErr) throw getErr;
         if (data.session) {
-          await handleRedirect();
+          const url = getReturnUrl();
+          console.log('AuthCallback - Redirecting to (fallback):', url);
+          await new Promise(r => setTimeout(r, 300));
+          window.location.replace(url);
         } else {
           setError('Authentication did not complete. Please try again.');
         }
