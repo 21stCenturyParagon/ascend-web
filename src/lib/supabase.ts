@@ -39,7 +39,7 @@ export async function addToWaitlist(email: string): Promise<{ success: boolean; 
     const normalized = email.toLowerCase().trim();
     const { error } = await client.from('waitlist').insert([{ email: normalized }]);
     if (error) {
-      if ((error as any).code === '23505') {
+      if ((error as { code?: string }).code === '23505') {
         return { success: false, error: 'This email is already on the waitlist!' };
       }
       throw error;
@@ -114,32 +114,68 @@ export async function savePlayerRegistration(data: {
   twitter?: string;
   youtube?: string;
   ownsAccount: boolean;
-}): Promise<{ success: boolean; error?: string }> {
+}): Promise<{ success: boolean; id?: string; error?: string }> {
   const client = getSupabase();
   try {
     const { data: { user }, error: userError } = await client.auth.getUser();
     if (userError) throw userError;
     if (!user) throw new Error('User not authenticated');
 
-    const { error: insertError } = await client.from('player_registrations').insert([{
+    const { data: inserted, error: insertError } = await client
+      .from('player_registrations')
+      .insert([{
       user_id: user.id,
       riot_id: data.riotId.trim(),
       twitter: data.twitter?.trim() || null,
       youtube: data.youtube?.trim() || null,
       owns_account: data.ownsAccount,
       created_at: new Date().toISOString(),
-    }]);
+    }])
+      .select('id')
+      .single();
 
     if (insertError) {
-      if ((insertError as any).code === '23505') {
+      if ((insertError as { code?: string }).code === '23505') {
         return { success: false, error: 'You have already submitted a registration.' };
       }
       throw insertError;
     }
-
-    return { success: true };
+    return { success: true, id: inserted.id };
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error saving registration';
+    return { success: false, error: message };
+  }
+}
+
+// Fire Discord moderation webhook through Edge Function
+export async function queueRegistrationForModeration(payload: {
+  registrationId: string;
+  riotId: string;
+  twitter?: string | null;
+  youtube?: string | null;
+  userId: string;
+}): Promise<{ success: boolean; error?: string }> {
+  try {
+    const url = getRequiredEnv('VITE_SUPABASE_URL');
+    const anon = getRequiredEnv('VITE_SUPABASE_ANON_KEY');
+    const res = await fetch(`${url}/functions/v1/moderation-request`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${anon}` },
+      body: JSON.stringify({
+        registration_id: payload.registrationId,
+        riot_id: payload.riotId,
+        twitter: payload.twitter ?? null,
+        youtube: payload.youtube ?? null,
+        user_id: payload.userId,
+      }),
+    });
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(`Moderation webhook failed: ${res.status} ${text}`);
+    }
+    return { success: true };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Unknown error queueing moderation';
     return { success: false, error: message };
   }
 }

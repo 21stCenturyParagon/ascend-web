@@ -1,7 +1,7 @@
 import BrandHeader from '../components/BrandHeader';
 import useResponsiveLayout from '../hooks/useResponsiveLayout';
 import { useEffect, useState } from 'react';
-import { getSupabase, checkDiscordServerMembership, savePlayerRegistration } from '../lib/supabase';
+import { getSupabase, checkDiscordServerMembership, savePlayerRegistration, queueRegistrationForModeration } from '../lib/supabase';
 import { IoMdRefresh } from 'react-icons/io';
 import { AiOutlineLoading3Quarters } from 'react-icons/ai';
 
@@ -84,7 +84,7 @@ export default function LoggedInRegistration() {
       // User is in Discord, save to DB
       setShowDiscordPrompt(false); // Hide Discord prompt before saving
       
-      const { success, error: saveError } = await savePlayerRegistration({
+      const { success, id: registrationId, error: saveError } = await savePlayerRegistration({
         riotId,
         twitter: twitter || undefined,
         youtube: youtube || undefined,
@@ -93,6 +93,22 @@ export default function LoggedInRegistration() {
       
       if (!success) {
         throw new Error(saveError || 'Failed to save registration');
+      }
+      // Fire Discord moderation webhook (best-effort, non-blocking UX)
+      try {
+        const client = getSupabase();
+        const { data: { user } } = await client.auth.getUser();
+        if (registrationId && user) {
+          void queueRegistrationForModeration({
+            registrationId,
+            riotId,
+            twitter: twitter || null,
+            youtube: youtube || null,
+            userId: user.id,
+          });
+        }
+      } catch (e) {
+        console.error('Failed to queue moderation webhook:', e);
       }
       
       setApplicationSubmitted(true);
