@@ -10,6 +10,8 @@ type ReviewData = {
   youtube: string | null;
   status: 'pending' | 'approved' | 'rejected';
   review_reason: string | null;
+  display_name?: string | null;
+  avatar_url?: string | null;
 };
 
 export default function AdminReview() {
@@ -58,7 +60,7 @@ export default function AdminReview() {
         // Load registration
         const { data: reg, error: regErr } = await client
           .from('player_registrations')
-          .select('id, riot_id, twitter, youtube, status, review_reason, approved_at, reviewed_by')
+          .select('id, riot_id, twitter, youtube, status, review_reason, approved_at, reviewed_by, display_name, avatar_url')
           .eq('id', registrationId)
           .single();
         if (regErr) throw regErr as unknown as Error;
@@ -111,11 +113,15 @@ export default function AdminReview() {
         <form style={{ width: '100%', maxWidth: headerMaxWidth, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '24px 0px', gap: 40, background: 'transparent', color: '#CECFD2', fontFamily: '"IBM Plex Sans", system-ui, sans-serif', boxSizing: 'border-box' }} onSubmit={(e) => e.preventDefault()}>
           <section style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 32, width: '100%', boxSizing: 'border-box' }}>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '0px 16px', gap: 24, width: '100%', boxSizing: 'border-box' }}>
-              <div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
-                <div style={{ color: '#F7F7F7', fontWeight: 600, fontSize: 20, lineHeight: '30px' }}>Application Review</div>
-                {loading && <div>Loading…</div>}
-                {error && <div role="alert" style={{ color: '#EF4444' }}>{error}</div>}
+              <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'flex-start', gap: 12, width: '100%', boxSizing: 'border-box' }}>
+                <img src={data?.avatar_url || ''} alt="avatar" onError={(e) => { (e.currentTarget as HTMLImageElement).style.visibility = 'hidden'; }} style={{ boxSizing: 'border-box', width: 56, height: 56, minWidth: 56, border: '1px solid rgba(0,0,0,0.08)', borderRadius: 9999, objectFit: 'cover', background: 'rgba(255,255,255,0.08)' }} />
+                <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minWidth: 0, boxSizing: 'border-box' }}>
+                  <div style={{ color: '#F7F7F7', fontWeight: 600, fontSize: 20, lineHeight: '30px', wordWrap: 'break-word', fontFamily: '"IBM Plex Sans", system-ui, sans-serif' }}>Hi {data?.display_name || 'player'}</div>
+                  <div style={{ color: '#94979C', fontSize: 16, lineHeight: '24px', wordWrap: 'break-word', fontFamily: '"IBM Plex Sans", system-ui, sans-serif' }}>{'Register for Ascend Leagues'}</div>
+                </div>
               </div>
+              {loading && <div>Loading…</div>}
+              {error && <div role="alert" style={{ color: '#EF4444' }}>{error}</div>}
 
               {data && (
                 <>

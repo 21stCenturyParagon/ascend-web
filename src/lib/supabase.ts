@@ -141,6 +141,8 @@ export async function savePlayerRegistration(data: {
       twitter: data.twitter?.trim() || null,
       youtube: data.youtube?.trim() || null,
       owns_account: data.ownsAccount,
+      display_name: (user.user_metadata as Record<string, unknown>)?.['full_name'] as string || (user.user_metadata as Record<string, unknown>)?.['name'] as string || null,
+      avatar_url: (user.user_metadata as Record<string, unknown>)?.['avatar_url'] as string || null,
       created_at: new Date().toISOString(),
     }])
       .select('id')
