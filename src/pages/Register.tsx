@@ -53,7 +53,18 @@ export default function Register() {
             <button
               onClick={async () => {
                 try {
-                  await signInWithDiscord('/auth/callback');
+                  // Preserve return URL all the way to callback
+                  let ret = '/register/details';
+                  try {
+                    const u = new URL(window.location.href);
+                    const nextParam = u.searchParams.get('next');
+                    const stored = sessionStorage.getItem('auth_return_url');
+                    ret = stored || nextParam || ret;
+                  } catch {
+                    // ignore
+                  }
+                  const cb = `/auth/callback?next=${encodeURIComponent(ret)}`;
+                  await signInWithDiscord(cb);
                 } catch (e) {
                   const msg = e instanceof Error ? e.message : 'Unknown error';
                   console.error('Discord OAuth start failed:', msg);
