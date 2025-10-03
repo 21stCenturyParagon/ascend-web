@@ -1,4 +1,5 @@
 import BrandHeader from '../components/BrandHeader';
+import { useEffect } from 'react';
 import useResponsiveLayout from '../hooks/useResponsiveLayout';
 import { signInWithDiscord } from '../lib/supabase';
 
@@ -13,6 +14,18 @@ function DiscordIcon({ size = 24 }: { size?: number }) {
 
 export default function Register() {
   const { isTablet, headerMaxWidth } = useResponsiveLayout();
+
+  useEffect(() => {
+    try {
+      const url = new URL(window.location.href);
+      const next = url.searchParams.get('next');
+      if (next) {
+        sessionStorage.setItem('auth_return_url', next);
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', backgroundImage: 'url(/image.png)', position: 'relative' }}>

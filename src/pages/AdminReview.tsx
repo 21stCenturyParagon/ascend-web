@@ -45,7 +45,8 @@ export default function AdminReview() {
           } catch (e) {
             console.error('Failed to store return URL:', e);
           }
-          window.location.replace('/register');
+          const ret = encodeURIComponent(window.location.href);
+          window.location.replace(`/register?next=${ret}`);
           return;
         }
         // Role check: must be admin
