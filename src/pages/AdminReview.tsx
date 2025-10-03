@@ -15,6 +15,7 @@ type ReviewData = {
   reviewed_by?: string | null;
   reviewed_by_name?: string | null;
   approved_at?: string | null;
+  discord_user_id?: string | null;
 };
 
 export default function AdminReview() {
@@ -63,7 +64,7 @@ export default function AdminReview() {
         // Load registration
         const { data: reg, error: regErr } = await client
           .from('player_registrations')
-          .select('id, riot_id, twitter, youtube, status, review_reason, approved_at, reviewed_by, reviewed_by_name, display_name, avatar_url')
+          .select('id, riot_id, twitter, youtube, status, review_reason, approved_at, reviewed_by, reviewed_by_name, display_name, avatar_url, discord_user_id')
           .eq('id', registrationId)
           .single();
         if (regErr) throw regErr as unknown as Error;
@@ -113,7 +114,7 @@ export default function AdminReview() {
             status,
             reason: status === 'rejected' ? (reason || null) : null,
             display_name: data.display_name || null,
-            discord_user_id: (data as unknown as { discord_user_id?: string }).discord_user_id || null,
+            discord_user_id: data.discord_user_id || null,
           }),
         });
       } catch (e) {
