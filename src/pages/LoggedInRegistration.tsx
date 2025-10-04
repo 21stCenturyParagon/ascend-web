@@ -45,16 +45,23 @@ export default function LoggedInRegistration() {
             setAvatarUrl(meta.avatar_url);
           }
           
-          // Check if user already has a registration
-          const { data: existingReg, error: regError } = await client
+          // Check if user has any pending or approved registrations
+          const { data: registrations, error: regError } = await client
             .from('player_registrations')
-            .select('id')
-            .eq('user_id', u.id)
-            .single();
+            .select('id, status')
+            .eq('user_id', u.id);
           
-          if (!regError && existingReg) {
-            // User already registered, show success page
-            setApplicationSubmitted(true);
+          if (!regError && registrations && registrations.length > 0) {
+            // Check if there's any pending or approved application
+            const hasPendingOrApproved = registrations.some(
+              (reg) => reg.status === 'pending' || reg.status === 'approved'
+            );
+            
+            if (hasPendingOrApproved) {
+              // User has pending or approved application, show success page
+              setApplicationSubmitted(true);
+            }
+            // If all applications are rejected, user can re-register (don't set applicationSubmitted)
           }
         }
       } catch (e) {
