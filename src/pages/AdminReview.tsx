@@ -256,7 +256,7 @@ export default function AdminReview() {
                             {/* <option value="">Select a league</option> */}
                             {leagues.map((league) => (
                               <option key={league.id} value={league.id}>
-                                {league.code} - {league.name}
+                                {league.code}
                               </option>
                             ))}
                           </select>
