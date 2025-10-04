@@ -1,4 +1,5 @@
 import BrandHeader from '../components/BrandHeader';
+import RulebookModal from '../components/RulebookModal';
 import useResponsiveLayout from '../hooks/useResponsiveLayout';
 import { useEffect, useState } from 'react';
 import { getSupabase, checkDiscordServerMembership, savePlayerRegistration, queueRegistrationForModeration } from '../lib/supabase';
@@ -29,6 +30,7 @@ export default function LoggedInRegistration() {
   const [applicationSubmitted, setApplicationSubmitted] = useState<boolean>(false);
   const [checking, setChecking] = useState<boolean>(false);
   const [initialLoading, setInitialLoading] = useState<boolean>(true);
+  const [showRulebook, setShowRulebook] = useState<boolean>(false);
 
   useEffect(() => {
     const client = getSupabase();
@@ -354,7 +356,7 @@ export default function LoggedInRegistration() {
 
                 <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, width: '100%', color: '#94979C', fontSize: 12, cursor: 'pointer', boxSizing: 'border-box', fontFamily: '"IBM Plex Sans", system-ui, sans-serif' }}>
                   <input type="checkbox" checked={agree} onChange={(e) => setAgree(e.target.checked)} style={{ marginTop: 2, minWidth: 16 }} required={true} />
-                  <span>I agree to follow and abide by the official <a href="#" style={{ color: '#A78BFA' }}>Ascend Leagues Rulebook</a></span>
+                  <span>I agree to follow and abide by the official <a href="#" onClick={(e) => { e.preventDefault(); setShowRulebook(true); }} style={{ color: '#A78BFA', textDecoration: 'underline', cursor: 'pointer' }}>Ascend Leagues Rulebook</a></span>
                 </label>
 
                 {error && <div role="alert" style={{ color: '#EF4444', width: '100%', boxSizing: 'border-box', fontFamily: '"IBM Plex Sans", system-ui, sans-serif', fontSize: 14 }}>{error}</div>}
@@ -367,6 +369,8 @@ export default function LoggedInRegistration() {
           </section>
         </form>
       </main>
+      
+      <RulebookModal isOpen={showRulebook} onClose={() => setShowRulebook(false)} />
     </div>
   );
 }
