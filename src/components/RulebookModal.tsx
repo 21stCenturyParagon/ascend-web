@@ -78,7 +78,7 @@ export default function RulebookModal({ isOpen, onClose }: RulebookModalProps) {
         {/* PDF viewer iframe */}
         <div style={{ flex: 1, overflow: 'hidden' }}>
           <iframe
-            src="/ascend-leagues-rulebook.pdf#toolbar=0&navpanes=0&scrollbar=1"
+            src="https://wdcwyvfeegchjadtyhkh.supabase.co/storage/v1/object/public/public-documents/ascend-leagues-rulebook-pdf.pdf#toolbar=0&navpanes=0&scrollbar=1"
             title="Ascend Leagues Rulebook"
             style={{
               width: '100%',
