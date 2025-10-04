@@ -142,6 +142,18 @@ export default function AdminReview() {
       if (upErr) throw upErr as unknown as Error;
       // Notify player and assign role if approved (via Supabase invoke to avoid CORS)
       try {
+        // Get league info if approved
+        let leagueInfo: { name?: string; code?: string } | null = null;
+        if (status === 'approved' && selectedLeagueId) {
+          const selectedLeague = leagues.find(l => l.id === selectedLeagueId);
+          if (selectedLeague) {
+            leagueInfo = {
+              name: selectedLeague.name,
+              code: selectedLeague.code
+            };
+          }
+        }
+        
         const { error: fnError } = await client.functions.invoke('moderation-notify', {
           body: {
             id: registrationId,
@@ -149,6 +161,7 @@ export default function AdminReview() {
             reason: status === 'rejected' ? (reason || null) : null,
             display_name: data.display_name || null,
             discord_user_id: data.discord_user_id || null,
+            league: leagueInfo,
           },
         });
         if (fnError) {
