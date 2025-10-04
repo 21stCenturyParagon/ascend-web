@@ -253,7 +253,7 @@ export default function AdminReview() {
                             onChange={(e) => setSelectedLeagueId(e.target.value)}
                             style={{ width: '100%', height: 44, background: '#0C0E12', border: '1px solid #373A41', borderRadius: 8, color: '#FFFFFF', padding: '0 14px', boxSizing: 'border-box', fontFamily: '"IBM Plex Sans", system-ui, sans-serif', fontSize: 16 }}
                           >
-                            <option value="">Select a league</option>
+                            {/* <option value="">Select a league</option> */}
                             {leagues.map((league) => (
                               <option key={league.id} value={league.id}>
                                 {league.code} - {league.name}
