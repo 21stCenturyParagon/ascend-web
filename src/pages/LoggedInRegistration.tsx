@@ -38,34 +38,40 @@ export default function LoggedInRegistration() {
         const { data } = await client.auth.getUser();
         const u = data?.user as { user_metadata?: Record<string, unknown>; id?: string } | null;
         
-        if (u) {
-          const meta = (u.user_metadata || {}) as { full_name?: string; name?: string; avatar_url?: string };
-          setDisplayName(meta.full_name || meta.name || '');
-          if (typeof meta.avatar_url === 'string' && meta.avatar_url) {
-            setAvatarUrl(meta.avatar_url);
-          }
+        if (!u) {
+          // No logged-in user, redirect to /register
+          window.location.replace('/register');
+          return;
+        }
+        
+        const meta = (u.user_metadata || {}) as { full_name?: string; name?: string; avatar_url?: string };
+        setDisplayName(meta.full_name || meta.name || '');
+        if (typeof meta.avatar_url === 'string' && meta.avatar_url) {
+          setAvatarUrl(meta.avatar_url);
+        }
+        
+        // Check if user has any pending or approved registrations
+        const { data: registrations, error: regError } = await client
+          .from('player_registrations')
+          .select('id, status')
+          .eq('user_id', u.id);
+        
+        if (!regError && registrations && registrations.length > 0) {
+          // Check if there's any pending or approved application
+          const hasPendingOrApproved = registrations.some(
+            (reg) => reg.status === 'pending' || reg.status === 'approved'
+          );
           
-          // Check if user has any pending or approved registrations
-          const { data: registrations, error: regError } = await client
-            .from('player_registrations')
-            .select('id, status')
-            .eq('user_id', u.id);
-          
-          if (!regError && registrations && registrations.length > 0) {
-            // Check if there's any pending or approved application
-            const hasPendingOrApproved = registrations.some(
-              (reg) => reg.status === 'pending' || reg.status === 'approved'
-            );
-            
-            if (hasPendingOrApproved) {
-              // User has pending or approved application, show success page
-              setApplicationSubmitted(true);
-            }
-            // If all applications are rejected, user can re-register (don't set applicationSubmitted)
+          if (hasPendingOrApproved) {
+            // User has pending or approved application, show success page
+            setApplicationSubmitted(true);
           }
+          // If all applications are rejected, user can re-register (don't set applicationSubmitted)
         }
       } catch (e) {
         console.error('Failed to fetch user for registration page:', e);
+        // On error, also redirect to /register to be safe
+        window.location.replace('/register');
       } finally {
         setInitialLoading(false);
       }
