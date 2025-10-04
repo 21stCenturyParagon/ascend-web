@@ -4,7 +4,8 @@
     { "source": "/register/details", "destination": "/" },
     { "source": "/auth/callback", "destination": "/" },
     { "source": "/admin/review", "destination": "/" },
-    { "source": "/admin/login", "destination": "/" }
+    { "source": "/admin/login", "destination": "/" },
+    { "source": "/rulebook", "destination": "/" }
   ]
 }
 
