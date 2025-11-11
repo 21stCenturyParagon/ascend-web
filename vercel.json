@@ -5,7 +5,8 @@
     { "source": "/auth/callback", "destination": "/" },
     { "source": "/admin/review", "destination": "/" },
     { "source": "/admin/login", "destination": "/" },
-    { "source": "/rulebook", "destination": "/" }
+    { "source": "/rulebook", "destination": "/" },
+    { "source": "/breakpointseries/rulebook", "destination": "/" }
   ]
 }
 

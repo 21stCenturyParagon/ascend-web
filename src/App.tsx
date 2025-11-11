@@ -5,6 +5,7 @@ import AuthCallback from './pages/AuthCallback';
 import LoggedInRegistration from './pages/LoggedInRegistration';
 import AdminReview from './pages/AdminReview';
 import Rulebook from './pages/Rulebook';
+import Rulebook2 from './pages/Rulebook2';
 // Lazy import type issues can occur; use direct import
 import AdminLogin from './pages/AdminLogin.tsx';
 
@@ -22,6 +23,7 @@ export default function App() {
   if (path === '/register/details') return <LoggedInRegistration />;
   if (path === '/register') return <Register />;
   if (path === '/rulebook') return <Rulebook />;
+  if (path === '/breakpointseries/rulebook') return <Rulebook2 />;
   if (path.startsWith('/admin/review')) return <AdminReview />;
   if (path.startsWith('/admin/login')) return <AdminLogin />;
   return <Landing />;
