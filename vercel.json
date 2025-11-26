@@ -6,7 +6,8 @@
     { "source": "/admin/review", "destination": "/" },
     { "source": "/admin/login", "destination": "/" },
     { "source": "/rulebook", "destination": "/" },
-    { "source": "/breakpointseries/rulebook", "destination": "/" }
+    { "source": "/breakpointseries/rulebook", "destination": "/" },
+    { "source": "/pulsarxwaimers/rulebook", "destination": "/" }
   ]
 }
 
