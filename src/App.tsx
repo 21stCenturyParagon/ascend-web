@@ -9,6 +9,9 @@ import Rulebook2 from './pages/Rulebook2';
 import PulsarXWaimersRulebook from './pages/PulsarXWaimersRulebook';
 // Lazy import type issues can occur; use direct import
 import AdminLogin from './pages/AdminLogin.tsx';
+import TemplateBuilder from './pages/TemplateBuilder';
+import UseTemplate from './pages/UseTemplate';
+import TemplateDashboard from './pages/TemplateDashboard';
 
 function getPath(): string {
   try {
@@ -20,6 +23,11 @@ function getPath(): string {
 
 export default function App() {
   const path = getPath();
+  if (path === '/templates') return <TemplateDashboard />;
+  if (path === '/templates/new') return <TemplateBuilder />;
+  if (path.startsWith('/templates/') && path.endsWith('/use')) {
+    return <UseTemplate />;
+  }
   if (path === '/auth/callback') return <AuthCallback />;
   if (path === '/register/details') return <LoggedInRegistration />;
   if (path === '/register') return <Register />;
