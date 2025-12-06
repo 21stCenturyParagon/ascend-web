@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { TemplateRecord } from '../lib/templates';
 import { listTemplates } from '../lib/templates';
 import { getSupabase, signInWithDiscord } from '../lib/supabase';

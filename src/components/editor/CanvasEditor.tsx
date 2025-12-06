@@ -1,4 +1,5 @@
-import React, { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
+import type { FC, RefObject } from 'react';
 import { Stage, Layer, Rect, Text, Group, Image as KonvaImage, Transformer } from 'react-konva';
 import useImage from 'use-image';
 import type { Stage as StageType } from 'konva/lib/Stage';
@@ -18,23 +19,23 @@ type Props = {
   onSelect?: (id: string | null) => void;
   onUpdateElement?: (element: TemplateElement) => void;
   editable?: boolean;
-  stageRef?: React.RefObject<StageType>;
+  stageRef?: RefObject<StageType>;
 };
 
-const Placeholder: React.FC<{ text: string; width: number; height: number }> = ({ text, width, height }) => (
+const Placeholder: FC<{ text: string; width: number; height: number }> = ({ text, width, height }) => (
   <Group>
     <Rect width={width} height={height} stroke="#4b5563" dash={[6, 6]} cornerRadius={4} />
     <Text text={text} width={width} height={height} align="center" verticalAlign="middle" fill="#4b5563" />
   </Group>
 );
 
-const Background: React.FC<{ url?: string; width: number; height: number }> = ({ url, width, height }) => {
+const Background: FC<{ url?: string; width: number; height: number }> = ({ url, width, height }) => {
   const [image] = useImage(url || '');
   if (!url || !image) return null;
   return <KonvaImage image={image} width={width} height={height} listening={false} />;
 };
 
-export const CanvasEditor: React.FC<Props> = ({
+export const CanvasEditor: FC<Props> = ({
   backgroundUrl,
   config,
   data,
@@ -146,7 +147,8 @@ export const CanvasEditor: React.FC<Props> = ({
 
   const renderTable = (el: RepeatingTable) => {
     const rows = data?.tableRows?.slice(0, el.maxRows) ?? [];
-    const showRows = rows.length ? rows : Array.from({ length: el.maxRows }).map((_, idx) => ({ __placeholder: idx + 1 }));
+    const showRows: Array<Record<string, string> | { __placeholder: number }> =
+      rows.length ? rows : Array.from({ length: el.maxRows }).map((_, idx) => ({ __placeholder: idx + 1 }));
     return (
       <Group
         key={el.id}
@@ -166,7 +168,10 @@ export const CanvasEditor: React.FC<Props> = ({
             <Group key={`${el.id}-row-${rowIndex}`} y={y}>
               {el.columns.map((col) => {
                 const x = col.x;
-                const text = row[col.key] ?? (row as Record<string, string>).__placeholder?.toString?.() ?? col.key;
+                const text =
+                  '__placeholder' in row
+                    ? String(row.__placeholder)
+                    : (row as Record<string, string>)[col.key] ?? col.key;
                 return (
                   <Group key={`${el.id}-row-${rowIndex}-col-${col.key}`} x={x}>
                     <Rect

@@ -1,4 +1,4 @@
-import Papa from 'papaparse';
+import Papa, { type ParseError, type ParseResult } from 'papaparse';
 import type { TemplateConfig } from './templates';
 import { collectRequiredColumns } from './templates';
 
@@ -19,8 +19,8 @@ export async function parseCsvFile(file: File): Promise<CsvOperationResult<CsvPa
       Papa.parse<Record<string, string>>(text, {
         header: true,
         skipEmptyLines: true,
-        transformHeader: (header) => header.trim(),
-        complete: (results) => {
+        transformHeader: (header: string) => header.trim(),
+        complete: (results: ParseResult<Record<string, string>>) => {
           if (results.errors.length) {
             const first = results.errors[0];
             resolve({
@@ -32,7 +32,7 @@ export async function parseCsvFile(file: File): Promise<CsvOperationResult<CsvPa
           const headers = results.meta.fields ?? [];
           resolve({ ok: true, data: { headers, rows: results.data } });
         },
-        error: (error) => {
+        error: (error: ParseError) => {
           resolve({ ok: false, error: error.message });
         },
       });
@@ -68,7 +68,6 @@ export function trimRowsToLimit(
     if (rows.length <= maxRows) {
       return { ok: true, data: rows };
     }
-    const trimmed = rows.slice(0, maxRows);
     return {
       ok: false,
       error: `CSV has ${rows.length} rows. Limit is ${maxRows}. Please remove ${rows.length - maxRows} row(s).`,

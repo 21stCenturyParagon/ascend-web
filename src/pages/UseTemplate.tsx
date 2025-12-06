@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import CanvasEditor from '../components/editor/CanvasEditor';
 import type { TemplateConfig, TemplateRecord } from '../lib/templates';
 import { getPublicImageUrl, getTemplateById, mapCsvToTemplateData } from '../lib/templates';
@@ -150,7 +150,7 @@ export default function UseTemplate() {
         </button>
       </div>
 
-      {status.kind !== 'idle' && status.kind !== 'auth' && status.message && (
+      {status.kind !== 'idle' && status.message && (
         <div
           style={{
             padding: 10,

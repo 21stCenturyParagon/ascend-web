@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import CanvasEditor from '../components/editor/CanvasEditor';
 import FieldInspector from '../components/editor/FieldInspector';
 import RepeatingTableInspector from '../components/editor/RepeatingTableInspector';
