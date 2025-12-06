@@ -32,8 +32,9 @@ export async function parseCsvFile(file: File): Promise<CsvOperationResult<CsvPa
           const headers = results.meta.fields ?? [];
           resolve({ ok: true, data: { headers, rows: results.data } });
         },
-        error: (error: ParseError) => {
-          resolve({ ok: false, error: error.message });
+        error: (error: ParseError | Error) => {
+          const message = (error as ParseError).message ?? error.message ?? 'CSV parse error';
+          resolve({ ok: false, error: message });
         },
       });
     });
