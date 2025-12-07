@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { Stage as KonvaStage } from 'konva/lib/Stage';
 import TemplateNav from '../components/TemplateNav';
 import CanvasEditor from '../components/editor/CanvasEditor';
 import FieldInspector from '../components/editor/FieldInspector';
@@ -63,7 +64,7 @@ export default function TemplateBuilder() {
   const [authState, setAuthState] = useState<AuthState>({ kind: 'loading' });
   const [zoom, setZoom] = useState<number>(1);
 
-  const stageRef = useRef<any>(null);
+  const stageRef = useRef<KonvaStage | null>(null);
 
   const zoomIn = () => setZoom((z) => Math.min(z * 1.25, 3));
   const zoomOut = () => setZoom((z) => Math.max(z / 1.25, 0.25));
@@ -255,7 +256,7 @@ export default function TemplateBuilder() {
     <div style={{ background: '#f8fafc', minHeight: '100vh', color: '#0f172a' }}>
       <TemplateNav />
       
-      <main style={{ padding: 16, maxWidth: 2000, margin: '0 auto' }}>
+      <main style={{ padding: 16, maxWidth: '100%', margin: '0 auto' }}>
         {/* Auth warning banner */}
         {authState.kind === 'unauth' && (
           <div style={authBannerStyle}>
@@ -550,10 +551,7 @@ const inspectorPanelStyle: React.CSSProperties = {
   borderRadius: 8,
   padding: 16,
   minHeight: 400,
-  maxHeight: 'calc(100vh - 200px)',
-  overflow: 'auto',
-  position: 'sticky',
-  top: 80,
+  height: '100%',
 };
 
 const inspectorTitleStyle: React.CSSProperties = {

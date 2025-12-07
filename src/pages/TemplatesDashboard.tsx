@@ -110,7 +110,7 @@ const pageStyle: React.CSSProperties = {
 };
 
 const mainStyle: React.CSSProperties = {
-  maxWidth: 1200,
+  maxWidth: '100%',
   margin: '0 auto',
   padding: '24px 16px',
 };
@@ -185,7 +185,7 @@ const createButtonStyle: React.CSSProperties = {
 
 const gridStyle: React.CSSProperties = {
   display: 'grid',
-  gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+  gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
   gap: 24,
 };
 
