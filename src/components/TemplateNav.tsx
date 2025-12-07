@@ -92,7 +92,6 @@ export default function TemplateNav() {
 const navStyle: React.CSSProperties = {
   background: '#fff',
   borderBottom: '1px solid #e5e7eb',
-  padding: '0 16px',
   position: 'sticky',
   top: 0,
   zIndex: 100,
@@ -102,9 +101,10 @@ const navInner: React.CSSProperties = {
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',
-  maxWidth: 1200,
+  maxWidth: '100%',
   margin: '0 auto',
   height: 56,
+  padding: '0 16px',
 };
 
 const logoSection: React.CSSProperties = {
