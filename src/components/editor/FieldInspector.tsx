@@ -21,6 +21,11 @@ export const FieldInspector: React.FC<Props> = ({ field, onChange, onDelete }) =
     loadFont(field.fontFamily);
   }, [field.fontFamily]);
 
+  const handleFontChange = (fontFamily: string) => {
+    loadFont(fontFamily);
+    update({ fontFamily });
+  };
+
   const fontOptions = useMemo(() => (fonts.length ? fonts : [field.fontFamily]), [fonts, field.fontFamily]);
 
   return (
@@ -37,7 +42,7 @@ export const FieldInspector: React.FC<Props> = ({ field, onChange, onDelete }) =
       </label>
       <label>
         Font Family
-        <select value={field.fontFamily} onChange={(e) => update({ fontFamily: e.target.value })}>
+        <select value={field.fontFamily} onChange={(e) => handleFontChange(e.target.value)}>
           {fontOptions.map((font) => (
             <option key={font} value={font} style={{ fontFamily: font }}>
               {font}
