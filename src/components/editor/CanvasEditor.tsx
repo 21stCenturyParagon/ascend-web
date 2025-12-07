@@ -68,15 +68,19 @@ export const CanvasEditor: FC<Props> = ({
       return;
     }
     
-    const node = stage.findOne(`.${selectedNodeName}`);
-    if (node) {
-      transformer.nodes([node]);
-      transformer.getLayer()?.batchDraw();
-    } else {
-      transformer.nodes([]);
-      transformer.getLayer()?.batchDraw();
-    }
-  }, [editable, selectedNodeName, selectedElement, currentStageRef]);
+    // Small delay to ensure the node is rendered
+    setTimeout(() => {
+      const node = stage.findOne(`.${selectedNodeName}`);
+      if (node) {
+        transformer.nodes([node]);
+        transformer.forceUpdate();
+        transformer.getLayer()?.batchDraw();
+      } else {
+        transformer.nodes([]);
+        transformer.getLayer()?.batchDraw();
+      }
+    }, 0);
+  }, [editable, selectedNodeName, selectedElement, currentStageRef, config.elements]);
 
   const handleStageClick = () => {
     if (onSelect) onSelect(null);
@@ -92,41 +96,21 @@ export const CanvasEditor: FC<Props> = ({
     }
   };
 
-  const handleTransform = (el: TemplateElement, evt: KonvaEventObject<Event>) => {
+  const handleTransformEnd = (el: TemplateElement, evt: KonvaEventObject<Event>) => {
     if (!onUpdateElement || el.type !== 'text') return;
     const node = evt.target as any;
     const scaleX = node.scaleX();
     const scaleY = node.scaleY();
     
-    // Calculate new dimensions
+    // Calculate new dimensions based on current scale
     const newWidth = Math.max(40, Math.round(el.width * scaleX));
     const newHeight = Math.max(24, Math.round(el.height * scaleY));
     
-    // Update children immediately during transform
-    const children = node.getChildren?.() || [];
-    children.forEach((child: any) => {
-      if (child.getClassName() === 'Rect' || child.getClassName() === 'Text') {
-        child.width(newWidth);
-        child.height(newHeight);
-      }
-    });
-  };
-
-  const handleTransformEnd = (el: TemplateElement, evt: KonvaEventObject<Event>) => {
-    if (!onUpdateElement || el.type !== 'text') return;
-    const node = evt.target;
-    const scaleX = node.scaleX();
-    const scaleY = node.scaleY();
-    
-    // Calculate new dimensions
-    const newWidth = Math.max(40, Math.round(el.width * scaleX));
-    const newHeight = Math.max(24, Math.round(el.height * scaleY));
-    
-    // Reset scale
+    // Reset scale to 1
     node.scaleX(1);
     node.scaleY(1);
     
-    // Update element
+    // Update element with new dimensions
     onUpdateElement({
       ...el,
       x: Math.round(node.x()),
@@ -143,8 +127,6 @@ export const CanvasEditor: FC<Props> = ({
         key={el.id}
         x={el.x}
         y={el.y}
-        width={el.width}
-        height={el.height}
         draggable={editable}
         name={`node-${el.id}`}
         onClick={(e) => {
@@ -152,7 +134,6 @@ export const CanvasEditor: FC<Props> = ({
           onSelect?.(el.id);
         }}
         onDragEnd={(evt) => handleDragEnd(el, evt)}
-        onTransform={(evt) => handleTransform(el, evt)}
         onTransformEnd={(evt) => handleTransformEnd(el, evt)}
       >
         <Rect
