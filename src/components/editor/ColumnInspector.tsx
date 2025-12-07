@@ -24,6 +24,11 @@ export default function ColumnInspector({ column, onChange, onDelete, onDuplicat
     loadFonts();
   }, []);
 
+  // Load current font on mount
+  useEffect(() => {
+    loadFont(column.fontFamily);
+  }, []);
+
   const handleFontChange = (fontFamily: string) => {
     loadFont(fontFamily);
     onChange({ ...column, fontFamily });
@@ -134,20 +139,35 @@ export default function ColumnInspector({ column, onChange, onDelete, onDuplicat
         />
       </label>
 
-      <label style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-        <span style={{ fontSize: 12, fontWeight: 600 }}>Alignment</span>
-        <select
-          value={column.align}
-          onChange={(e) => onChange({ ...column, align: e.target.value as 'left' | 'center' | 'right' })}
-          style={{ padding: 6, borderRadius: 4, border: '1px solid #e5e7eb' }}
-        >
-          <option value="left">Left</option>
-          <option value="center">Center</option>
-          <option value="right">Right</option>
-        </select>
-      </label>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+        <label style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+          <span style={{ fontSize: 12, fontWeight: 600 }}>Horizontal Align</span>
+          <select
+            value={column.align}
+            onChange={(e) => onChange({ ...column, align: e.target.value as 'left' | 'center' | 'right' })}
+            style={{ padding: 6, borderRadius: 4, border: '1px solid #e5e7eb' }}
+          >
+            <option value="left">Left</option>
+            <option value="center">Center</option>
+            <option value="right">Right</option>
+          </select>
+        </label>
 
-      <div style={{ display: 'flex', gap: 8 }}>
+        <label style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+          <span style={{ fontSize: 12, fontWeight: 600 }}>Vertical Align</span>
+          <select
+            value={column.verticalAlign ?? 'middle'}
+            onChange={(e) => onChange({ ...column, verticalAlign: e.target.value as 'top' | 'middle' | 'bottom' })}
+            style={{ padding: 6, borderRadius: 4, border: '1px solid #e5e7eb' }}
+          >
+            <option value="top">Top</option>
+            <option value="middle">Middle</option>
+            <option value="bottom">Bottom</option>
+          </select>
+        </label>
+      </div>
+
+      <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
         <button
           onClick={onDuplicate}
           style={{
@@ -178,4 +198,3 @@ export default function ColumnInspector({ column, onChange, onDelete, onDuplicat
     </div>
   );
 }
-

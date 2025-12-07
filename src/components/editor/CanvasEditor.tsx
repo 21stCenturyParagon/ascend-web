@@ -115,7 +115,7 @@ const EditableTextField: FC<{
         wrap="word"
         fill={el.fill}
         align={el.align}
-        verticalAlign="middle"
+        verticalAlign={el.verticalAlign ?? 'middle'}
         padding={4}
         listening={false}
       />
@@ -218,7 +218,7 @@ export const CanvasEditor: FC<Props> = ({
                 lineHeight={1.2}
                 fill={el.fill}
                 align={el.align}
-                verticalAlign="middle"
+                verticalAlign={el.verticalAlign ?? 'middle'}
                 padding={4}
                 listening={false}
               />

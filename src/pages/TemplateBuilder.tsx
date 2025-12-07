@@ -26,6 +26,7 @@ function createTextField(): TextField {
     lineHeight: 1.2,
     fill: '#000000',
     align: 'left',
+    verticalAlign: 'middle',
   };
 }
 
@@ -41,6 +42,7 @@ function createColumn(): TableColumn {
     rowGap: 4,
     maxRows: 10,
     align: 'left',
+    verticalAlign: 'middle',
     fontFamily: 'Inter',
     fontSize: 18,
     fontWeight: 400,
@@ -308,7 +310,7 @@ export default function TemplateBuilder() {
         <div style={{ border: '1px solid #e5e7eb', padding: 12, borderRadius: 8, minHeight: 320 }}>
           {!selectedElement && <div>Select an element to edit its properties.</div>}
           {selectedElement?.type === 'text' && (
-            <FieldInspector field={selectedElement} onChange={setElement} onDelete={deleteElement} />
+            <FieldInspector field={selectedElement} onChange={setElement} onDelete={deleteElement} onDuplicate={duplicateElement} />
           )}
           {selectedElement?.type === 'column' && (
             <ColumnInspector column={selectedElement} onChange={setElement} onDelete={deleteElement} onDuplicate={duplicateElement} />

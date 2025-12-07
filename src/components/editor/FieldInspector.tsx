@@ -1,105 +1,192 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { TextField } from '../../lib/templates';
-import { fetchGoogleFonts, loadFont } from '../../lib/fonts';
+import { loadFont, DEFAULT_FONTS, fetchGoogleFonts } from '../../lib/fonts';
 
 type Props = {
   field: TextField;
-  onChange: (field: TextField) => void;
-  onDelete?: () => void;
+  onChange: (updated: TextField) => void;
+  onDelete: () => void;
+  onDuplicate?: () => void;
 };
 
-export const FieldInspector: React.FC<Props> = ({ field, onChange, onDelete }) => {
-  const update = (patch: Partial<TextField>) => onChange({ ...field, ...patch });
-
-  const [fonts, setFonts] = useState<string[]>([]);
+export default function FieldInspector({ field, onChange, onDelete, onDuplicate }: Props) {
+  const [fonts, setFonts] = useState<string[]>(DEFAULT_FONTS);
 
   useEffect(() => {
-    void fetchGoogleFonts().then((list) => setFonts(list));
+    const loadFonts = async () => {
+      try {
+        const fontList = await fetchGoogleFonts();
+        setFonts(fontList.slice(0, 100));
+      } catch (err) {
+        console.warn('Using default font list:', err);
+      }
+    };
+    loadFonts();
   }, []);
 
+  // Load current font on mount
   useEffect(() => {
     loadFont(field.fontFamily);
-  }, [field.fontFamily]);
+  }, []);
 
   const handleFontChange = (fontFamily: string) => {
     loadFont(fontFamily);
-    update({ fontFamily });
+    onChange({ ...field, fontFamily });
   };
 
-  const fontOptions = useMemo(() => (fonts.length ? fonts : [field.fontFamily]), [fonts, field.fontFamily]);
-
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-      <h3 style={{ margin: '8px 0 4px', fontWeight: 600 }}>Text Field</h3>
-      <label>
-        Key (CSV column)
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <h3 style={{ margin: 0, fontSize: 16 }}>Text Field Settings</h3>
+
+      <label style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+        <span style={{ fontSize: 12, fontWeight: 600 }}>Field Key (CSV header)</span>
         <input
           type="text"
           value={field.key}
-          onChange={(e) => update({ key: e.target.value })}
-          style={{ width: '100%' }}
+          onChange={(e) => onChange({ ...field, key: e.target.value })}
+          style={{ padding: 6, borderRadius: 4, border: '1px solid #e5e7eb' }}
         />
       </label>
-      <label>
-        Font Family
-        <select value={field.fontFamily} onChange={(e) => handleFontChange(e.target.value)}>
-          {fontOptions.map((font) => (
-            <option key={font} value={font} style={{ fontFamily: font }}>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+        <label style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+          <span style={{ fontSize: 12, fontWeight: 600 }}>Width</span>
+          <input
+            type="number"
+            value={field.width}
+            onChange={(e) => onChange({ ...field, width: Number(e.target.value) })}
+            style={{ padding: 6, borderRadius: 4, border: '1px solid #e5e7eb' }}
+          />
+        </label>
+
+        <label style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+          <span style={{ fontSize: 12, fontWeight: 600 }}>Height</span>
+          <input
+            type="number"
+            value={field.height}
+            onChange={(e) => onChange({ ...field, height: Number(e.target.value) })}
+            style={{ padding: 6, borderRadius: 4, border: '1px solid #e5e7eb' }}
+          />
+        </label>
+      </div>
+
+      <label style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+        <span style={{ fontSize: 12, fontWeight: 600 }}>Font Family</span>
+        <select
+          value={field.fontFamily}
+          onChange={(e) => handleFontChange(e.target.value)}
+          style={{ padding: 6, borderRadius: 4, border: '1px solid #e5e7eb' }}
+        >
+          {fonts.map((font) => (
+            <option key={font} value={font}>
               {font}
             </option>
           ))}
         </select>
       </label>
-      <label>
-        Font Size
-        <input
-          type="number"
-          value={field.fontSize}
-          onChange={(e) => update({ fontSize: Number(e.target.value) || field.fontSize })}
-          style={{ width: '100%' }}
-        />
-      </label>
-      <label>
-        Line Height
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+        <label style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+          <span style={{ fontSize: 12, fontWeight: 600 }}>Font Size</span>
+          <input
+            type="number"
+            value={field.fontSize}
+            onChange={(e) => onChange({ ...field, fontSize: Number(e.target.value) })}
+            style={{ padding: 6, borderRadius: 4, border: '1px solid #e5e7eb' }}
+          />
+        </label>
+
+        <label style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+          <span style={{ fontSize: 12, fontWeight: 600 }}>Font Weight</span>
+          <input
+            type="number"
+            value={field.fontWeight ?? 400}
+            onChange={(e) => onChange({ ...field, fontWeight: Number(e.target.value) })}
+            style={{ padding: 6, borderRadius: 4, border: '1px solid #e5e7eb' }}
+          />
+        </label>
+      </div>
+
+      <label style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+        <span style={{ fontSize: 12, fontWeight: 600 }}>Line Height</span>
         <input
           type="number"
           step="0.1"
           min={1}
           value={field.lineHeight ?? 1.2}
-          onChange={(e) => update({ lineHeight: Math.max(1, Number(e.target.value) || 1.2) })}
-          style={{ width: '100%' }}
+          onChange={(e) => onChange({ ...field, lineHeight: Math.max(1, Number(e.target.value) || 1.2) })}
+          style={{ padding: 6, borderRadius: 4, border: '1px solid #e5e7eb' }}
         />
       </label>
-      <label>
-        Font Weight
+
+      <label style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+        <span style={{ fontSize: 12, fontWeight: 600 }}>Text Color</span>
         <input
-          type="number"
-          value={field.fontWeight ?? 400}
-          onChange={(e) => update({ fontWeight: Number(e.target.value) || 400 })}
-          style={{ width: '100%' }}
+          type="color"
+          value={field.fill}
+          onChange={(e) => onChange({ ...field, fill: e.target.value })}
+          style={{ padding: 6, borderRadius: 4, border: '1px solid #e5e7eb', height: 40 }}
         />
       </label>
-      <label>
-        Color
-        <input type="color" value={field.fill} onChange={(e) => update({ fill: e.target.value })} />
-      </label>
-      <label>
-        Align
-        <select value={field.align} onChange={(e) => update({ align: e.target.value as TextField['align'] })}>
-          <option value="left">Left</option>
-          <option value="center">Center</option>
-          <option value="right">Right</option>
-        </select>
-      </label>
-      <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-        <button onClick={onDelete} style={{ background: '#fee2e2', border: '1px solid #ef4444', padding: '6px 10px' }}>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+        <label style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+          <span style={{ fontSize: 12, fontWeight: 600 }}>Horizontal Align</span>
+          <select
+            value={field.align}
+            onChange={(e) => onChange({ ...field, align: e.target.value as 'left' | 'center' | 'right' })}
+            style={{ padding: 6, borderRadius: 4, border: '1px solid #e5e7eb' }}
+          >
+            <option value="left">Left</option>
+            <option value="center">Center</option>
+            <option value="right">Right</option>
+          </select>
+        </label>
+
+        <label style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+          <span style={{ fontSize: 12, fontWeight: 600 }}>Vertical Align</span>
+          <select
+            value={field.verticalAlign ?? 'middle'}
+            onChange={(e) => onChange({ ...field, verticalAlign: e.target.value as 'top' | 'middle' | 'bottom' })}
+            style={{ padding: 6, borderRadius: 4, border: '1px solid #e5e7eb' }}
+          >
+            <option value="top">Top</option>
+            <option value="middle">Middle</option>
+            <option value="bottom">Bottom</option>
+          </select>
+        </label>
+      </div>
+
+      <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
+        {onDuplicate && (
+          <button
+            onClick={onDuplicate}
+            style={{
+              flex: 1,
+              padding: '8px 12px',
+              background: '#10b981',
+              color: '#fff',
+              border: 'none',
+              borderRadius: 6,
+            }}
+          >
+            Duplicate
+          </button>
+        )}
+        <button
+          onClick={onDelete}
+          style={{
+            flex: 1,
+            padding: '8px 12px',
+            background: '#ef4444',
+            color: '#fff',
+            border: 'none',
+            borderRadius: 6,
+          }}
+        >
           Delete
         </button>
       </div>
     </div>
   );
-};
-
-export default FieldInspector;
-
-
+}

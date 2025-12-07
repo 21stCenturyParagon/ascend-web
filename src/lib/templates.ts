@@ -15,6 +15,7 @@ export type TextField = {
   lineHeight?: number;
   fill: string;
   align: 'left' | 'center' | 'right';
+  verticalAlign: 'top' | 'middle' | 'bottom';
 };
 
 export type TableColumn = {
@@ -28,6 +29,7 @@ export type TableColumn = {
   rowGap: number;
   maxRows: number;
   align: 'left' | 'center' | 'right';
+  verticalAlign: 'top' | 'middle' | 'bottom';
   fontFamily: string;
   fontSize: number;
   fontWeight?: number;
