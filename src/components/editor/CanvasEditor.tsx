@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useCallback } from 'react';
+import { useEffect, useMemo, useRef, useCallback, useState } from 'react';
 import type { FC, RefObject } from 'react';
 import { Stage, Layer, Rect, Text, Group, Image as KonvaImage, Transformer } from 'react-konva';
 import useImage from 'use-image';
@@ -135,6 +135,7 @@ export const CanvasEditor: FC<Props> = ({
 }) => {
   const internalStageRef = useRef<StageType>(null);
   const transformerRef = useRef<Konva.Transformer>(null);
+  const [fontVersion, setFontVersion] = useState(0);
 
   const currentStageRef = stageRef ?? internalStageRef;
 
@@ -143,11 +144,15 @@ export const CanvasEditor: FC<Props> = ({
     [config.elements, selectedId],
   );
 
+  // Load all fonts used in elements and force re-render when loaded
   useEffect(() => {
-    // Ensure fonts used in elements are loaded into the document.
-    config.elements.forEach((el) => {
-      loadFont(el.fontFamily);
-    });
+    const loadAllFonts = async () => {
+      const fonts = new Set(config.elements.map((el) => el.fontFamily));
+      await Promise.all([...fonts].map((font) => loadFont(font)));
+      // Force canvas to re-render with loaded fonts
+      setFontVersion((v) => v + 1);
+    };
+    void loadAllFonts();
   }, [config.elements]);
 
   // Clear transformer when nothing is selected or non-text is selected
@@ -176,14 +181,14 @@ export const CanvasEditor: FC<Props> = ({
     onUpdateElement({ ...el, x: Math.round(x), y: Math.round(y) });
   };
 
-  const renderColumn = (el: TableColumn) => {
+  const renderColumn = (el: TableColumn, fontVer: number) => {
     const values = data?.columnData?.[el.id] ?? [];
     const showRows = values.length ? values : Array.from({ length: el.maxRows }).map((_, idx) => `Row ${idx + 1}`);
     const isSelected = selectedId === el.id;
 
     return (
       <Group
-        key={el.id}
+        key={`${el.id}-${fontVer}`}
         x={el.x}
         y={el.y}
         draggable={editable}
@@ -245,7 +250,7 @@ export const CanvasEditor: FC<Props> = ({
         {config.elements.map((el) =>
           el.type === 'text' ? (
             <EditableTextField
-              key={el.id}
+              key={`${el.id}-${fontVersion}`}
               el={el}
               value={data?.singleValues?.[el.key] ?? el.key}
               isSelected={selectedId === el.id}
@@ -255,7 +260,7 @@ export const CanvasEditor: FC<Props> = ({
               transformerRef={transformerRef}
             />
           ) : (
-            renderColumn(el)
+            renderColumn(el, fontVersion)
           )
         )}
         {editable && (

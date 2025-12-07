@@ -26,11 +26,13 @@ export default function FieldInspector({ field, onChange, onDelete, onDuplicate 
 
   // Load current font on mount
   useEffect(() => {
-    loadFont(field.fontFamily);
-  }, []);
+    void loadFont(field.fontFamily);
+  }, [field.fontFamily]);
 
-  const handleFontChange = (fontFamily: string) => {
-    loadFont(fontFamily);
+  const handleFontChange = async (fontFamily: string) => {
+    // Load font and wait for it to be ready before updating
+    await loadFont(fontFamily);
+    // Force update by creating a new object - this triggers canvas re-render
     onChange({ ...field, fontFamily });
   };
 

@@ -24,13 +24,15 @@ export default function ColumnInspector({ column, onChange, onDelete, onDuplicat
     loadFonts();
   }, []);
 
-  // Load current font on mount
+  // Load current font on mount and when it changes
   useEffect(() => {
-    loadFont(column.fontFamily);
-  }, []);
+    void loadFont(column.fontFamily);
+  }, [column.fontFamily]);
 
-  const handleFontChange = (fontFamily: string) => {
-    loadFont(fontFamily);
+  const handleFontChange = async (fontFamily: string) => {
+    // Load font and wait for it to be ready before updating
+    await loadFont(fontFamily);
+    // Force update by creating a new object - this triggers canvas re-render
     onChange({ ...column, fontFamily });
   };
 
