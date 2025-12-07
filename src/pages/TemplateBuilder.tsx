@@ -550,8 +550,11 @@ const inspectorPanelStyle: React.CSSProperties = {
   border: '1px solid #e5e7eb',
   borderRadius: 8,
   padding: 16,
-  minHeight: 400,
-  height: '100%',
+  display: 'flex',
+  flexDirection: 'column',
+  alignSelf: 'flex-start',
+  position: 'sticky',
+  top: 80,
 };
 
 const inspectorTitleStyle: React.CSSProperties = {

@@ -197,13 +197,13 @@ export default function ColumnInspector({ column, onChange, onDelete, onDuplicat
 const containerStyle: React.CSSProperties = {
   display: 'flex',
   flexDirection: 'column',
-  gap: 16,
+  gap: 12,
 };
 
 const sectionStyle: React.CSSProperties = {
   display: 'flex',
   flexDirection: 'column',
-  gap: 8,
+  gap: 6,
 };
 
 const sectionHeaderStyle: React.CSSProperties = {
@@ -212,13 +212,13 @@ const sectionHeaderStyle: React.CSSProperties = {
   textTransform: 'uppercase',
   letterSpacing: '0.5px',
   color: '#64748b',
-  marginBottom: 4,
+  marginBottom: 2,
 };
 
 const gridStyle: React.CSSProperties = {
   display: 'grid',
   gridTemplateColumns: '1fr 1fr',
-  gap: 8,
+  gap: 6,
 };
 
 const labelStyle: React.CSSProperties = {
@@ -234,18 +234,18 @@ const labelTextStyle: React.CSSProperties = {
 };
 
 const inputStyle: React.CSSProperties = {
-  padding: '8px 10px',
+  padding: '6px 8px',
   border: '1px solid #e2e8f0',
-  borderRadius: 6,
+  borderRadius: 4,
   fontSize: 13,
   outline: 'none',
   transition: 'border-color 0.15s',
 };
 
 const selectStyle: React.CSSProperties = {
-  padding: '8px 10px',
+  padding: '6px 8px',
   border: '1px solid #e2e8f0',
-  borderRadius: 6,
+  borderRadius: 4,
   fontSize: 13,
   outline: 'none',
   background: '#fff',
@@ -277,19 +277,19 @@ const colorValueStyle: React.CSSProperties = {
 
 const actionsStyle: React.CSSProperties = {
   display: 'flex',
-  gap: 8,
-  marginTop: 8,
-  paddingTop: 16,
+  gap: 6,
+  marginTop: 4,
+  paddingTop: 12,
   borderTop: '1px solid #e2e8f0',
 };
 
 const duplicateButtonStyle: React.CSSProperties = {
   flex: 1,
-  padding: '10px',
+  padding: '8px',
   background: '#fff',
   border: '1px solid #e2e8f0',
-  borderRadius: 6,
-  fontSize: 13,
+  borderRadius: 4,
+  fontSize: 12,
   fontWeight: 500,
   cursor: 'pointer',
   color: '#0f172a',
@@ -297,11 +297,11 @@ const duplicateButtonStyle: React.CSSProperties = {
 
 const deleteButtonStyle: React.CSSProperties = {
   flex: 1,
-  padding: '10px',
+  padding: '8px',
   background: '#fef2f2',
   border: '1px solid #fecaca',
-  borderRadius: 6,
-  fontSize: 13,
+  borderRadius: 4,
+  fontSize: 12,
   fontWeight: 500,
   cursor: 'pointer',
   color: '#991b1b',
