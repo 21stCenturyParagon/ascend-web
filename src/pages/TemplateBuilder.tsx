@@ -550,6 +550,10 @@ const inspectorPanelStyle: React.CSSProperties = {
   borderRadius: 8,
   padding: 16,
   minHeight: 400,
+  maxHeight: 'calc(100vh - 200px)',
+  overflow: 'auto',
+  position: 'sticky',
+  top: 80,
 };
 
 const inspectorTitleStyle: React.CSSProperties = {
