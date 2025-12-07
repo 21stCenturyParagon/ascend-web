@@ -377,8 +377,8 @@ export default function TemplateBuilder() {
             <h3 style={inspectorTitleStyle}>Properties</h3>
             {!selectedElement && (
               <div style={emptyInspectorStyle}>
-                <span style={{ fontSize: 32 }}>👆</span>
-                <p>Select an element on the canvas to edit its properties</p>
+                <span style={{ fontSize: 24 }}>👆</span>
+                <p style={{ margin: '8px 0 0', lineHeight: 1.4 }}>Select an element to edit properties</p>
               </div>
             )}
             {selectedElement?.type === 'text' && (
@@ -532,7 +532,7 @@ const statusStyle: React.CSSProperties = {
 
 const editorLayoutStyle: React.CSSProperties = {
   display: 'grid',
-  gridTemplateColumns: '1fr 320px',
+  gridTemplateColumns: '1fr 380px',
   gap: 16,
   alignItems: 'flex-start',
 };
@@ -549,7 +549,7 @@ const inspectorPanelStyle: React.CSSProperties = {
   background: '#fff',
   border: '1px solid #e5e7eb',
   borderRadius: 8,
-  padding: 16,
+  padding: 12,
   display: 'flex',
   flexDirection: 'column',
   alignSelf: 'flex-start',
@@ -558,17 +558,18 @@ const inspectorPanelStyle: React.CSSProperties = {
 };
 
 const inspectorTitleStyle: React.CSSProperties = {
-  margin: '0 0 16px',
-  fontSize: 16,
+  margin: '0 0 12px',
+  fontSize: 14,
   fontWeight: 600,
-  paddingBottom: 12,
+  paddingBottom: 10,
   borderBottom: '1px solid #e5e7eb',
 };
 
 const emptyInspectorStyle: React.CSSProperties = {
   textAlign: 'center',
   color: '#6b7280',
-  padding: '32px 16px',
+  padding: '24px 12px',
+  fontSize: 13,
 };
 
 const zoomLabelStyle: React.CSSProperties = {

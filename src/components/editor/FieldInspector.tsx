@@ -190,56 +190,56 @@ export default function FieldInspector({ field, onChange, onDelete, onDuplicate 
 const containerStyle: React.CSSProperties = {
   display: 'flex',
   flexDirection: 'column',
-  gap: 12,
+  gap: 10,
 };
 
 const sectionStyle: React.CSSProperties = {
   display: 'flex',
   flexDirection: 'column',
-  gap: 6,
+  gap: 5,
 };
 
 const sectionHeaderStyle: React.CSSProperties = {
-  fontSize: 11,
+  fontSize: 10,
   fontWeight: 700,
   textTransform: 'uppercase',
   letterSpacing: '0.5px',
   color: '#64748b',
-  marginBottom: 2,
+  marginBottom: 1,
 };
 
 const gridStyle: React.CSSProperties = {
   display: 'grid',
   gridTemplateColumns: '1fr 1fr',
-  gap: 6,
+  gap: 5,
 };
 
 const labelStyle: React.CSSProperties = {
   display: 'flex',
   flexDirection: 'column',
-  gap: 4,
+  gap: 3,
 };
 
 const labelTextStyle: React.CSSProperties = {
-  fontSize: 12,
+  fontSize: 11,
   fontWeight: 500,
   color: '#475569',
 };
 
 const inputStyle: React.CSSProperties = {
-  padding: '6px 8px',
+  padding: '5px 7px',
   border: '1px solid #e2e8f0',
   borderRadius: 4,
-  fontSize: 13,
+  fontSize: 12,
   outline: 'none',
   transition: 'border-color 0.15s',
 };
 
 const selectStyle: React.CSSProperties = {
-  padding: '6px 8px',
+  padding: '5px 7px',
   border: '1px solid #e2e8f0',
   borderRadius: 4,
-  fontSize: 13,
+  fontSize: 12,
   outline: 'none',
   background: '#fff',
   cursor: 'pointer',
@@ -248,41 +248,41 @@ const selectStyle: React.CSSProperties = {
 const colorInputWrapperStyle: React.CSSProperties = {
   display: 'flex',
   alignItems: 'center',
-  gap: 8,
-  padding: '6px',
+  gap: 6,
+  padding: '4px',
   border: '1px solid #e2e8f0',
-  borderRadius: 6,
+  borderRadius: 4,
 };
 
 const colorInputStyle: React.CSSProperties = {
-  width: 40,
-  height: 32,
+  width: 32,
+  height: 26,
   border: 'none',
-  borderRadius: 4,
+  borderRadius: 3,
   cursor: 'pointer',
 };
 
 const colorValueStyle: React.CSSProperties = {
-  fontSize: 12,
+  fontSize: 11,
   fontFamily: 'monospace',
   color: '#64748b',
 };
 
 const actionsStyle: React.CSSProperties = {
   display: 'flex',
-  gap: 6,
-  marginTop: 4,
-  paddingTop: 12,
+  gap: 5,
+  marginTop: 2,
+  paddingTop: 10,
   borderTop: '1px solid #e2e8f0',
 };
 
 const duplicateButtonStyle: React.CSSProperties = {
   flex: 1,
-  padding: '8px',
+  padding: '7px',
   background: '#fff',
   border: '1px solid #e2e8f0',
   borderRadius: 4,
-  fontSize: 12,
+  fontSize: 11,
   fontWeight: 500,
   cursor: 'pointer',
   color: '#0f172a',
@@ -290,11 +290,11 @@ const duplicateButtonStyle: React.CSSProperties = {
 
 const deleteButtonStyle: React.CSSProperties = {
   flex: 1,
-  padding: '8px',
+  padding: '7px',
   background: '#fef2f2',
   border: '1px solid #fecaca',
   borderRadius: 4,
-  fontSize: 12,
+  fontSize: 11,
   fontWeight: 500,
   cursor: 'pointer',
   color: '#991b1b',
