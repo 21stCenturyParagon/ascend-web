@@ -356,7 +356,7 @@ const pageStyle: React.CSSProperties = {
 };
 
 const mainStyle: React.CSSProperties = {
-  maxWidth: 1400,
+  maxWidth: 2000,
   margin: '0 auto',
   padding: '24px 16px',
 };
