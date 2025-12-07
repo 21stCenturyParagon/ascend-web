@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import CanvasEditor from '../components/editor/CanvasEditor';
 import FieldInspector from '../components/editor/FieldInspector';
-import RepeatingTableInspector from '../components/editor/RepeatingTableInspector';
-import type { TemplateConfig, TemplateElement, TextField, RepeatingTable } from '../lib/templates';
+import ColumnInspector from '../components/editor/ColumnInspector';
+import type { TemplateConfig, TemplateElement, TextField, TableColumn } from '../lib/templates';
 import { createEmptyConfig, buildExampleCsv, uploadTemplateBackground, saveTemplate } from '../lib/templates';
 import { getSupabase, signInWithDiscord } from '../lib/supabase';
 
@@ -13,7 +13,7 @@ const defaultCanvas = createEmptyConfig(800, 600);
 
 function createTextField(): TextField {
   return {
-    id: `text-${Date.now()}`,
+    id: `text-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`,
     type: 'text',
     key: 'field',
     x: 50,
@@ -29,25 +29,29 @@ function createTextField(): TextField {
   };
 }
 
-function createTable(): RepeatingTable {
+function createColumn(): TableColumn {
   return {
-    id: `table-${Date.now()}`,
-    type: 'repeating-table',
-    groupKey: 'leaderboard',
+    id: `col-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`,
+    type: 'column',
+    key: 'col',
     x: 50,
     y: 150,
-    rowHeight: 48,
+    width: 150,
+    rowHeight: 40,
     rowGap: 4,
     maxRows: 10,
-    columns: [
-      { key: 'name', x: 0, width: 200, align: 'left', fontFamily: 'Inter', fontSize: 20, fontWeight: 600, fill: '#000000' },
-      { key: 'score', x: 210, width: 120, align: 'right', fontFamily: 'Inter', fontSize: 20, fontWeight: 700, fill: '#000000' },
-    ],
+    align: 'left',
+    fontFamily: 'Inter',
+    fontSize: 18,
+    fontWeight: 400,
+    fill: '#000000',
   };
 }
 
 export default function TemplateBuilder() {
   const [config, setConfig] = useState<TemplateConfig>(defaultCanvas);
+  const [history, setHistory] = useState<TemplateConfig[]>([defaultCanvas]);
+  const [historyIndex, setHistoryIndex] = useState<number>(0);
   const [backgroundFile, setBackgroundFile] = useState<File | null>(null);
   const [backgroundUrl, setBackgroundUrl] = useState<string | undefined>();
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -81,17 +85,56 @@ export default function TemplateBuilder() {
     [config.elements, selectedId],
   );
 
+  const pushHistory = (newConfig: TemplateConfig) => {
+    const newHistory = history.slice(0, historyIndex + 1);
+    newHistory.push(newConfig);
+    setHistory(newHistory);
+    setHistoryIndex(newHistory.length - 1);
+    setConfig(newConfig);
+  };
+
+  const undo = () => {
+    if (historyIndex > 0) {
+      const newIndex = historyIndex - 1;
+      setHistoryIndex(newIndex);
+      setConfig(history[newIndex]);
+    }
+  };
+
+  const redo = () => {
+    if (historyIndex < history.length - 1) {
+      const newIndex = historyIndex + 1;
+      setHistoryIndex(newIndex);
+      setConfig(history[newIndex]);
+    }
+  };
+
   const setElement = (updated: TemplateElement) => {
-    setConfig((prev) => ({
-      ...prev,
-      elements: prev.elements.map((el) => (el.id === updated.id ? updated : el)),
-    }));
+    const newConfig = {
+      ...config,
+      elements: config.elements.map((el) => (el.id === updated.id ? updated : el)),
+    };
+    pushHistory(newConfig);
   };
 
   const deleteElement = () => {
     if (!selectedId) return;
-    setConfig((prev) => ({ ...prev, elements: prev.elements.filter((el) => el.id !== selectedId) }));
+    const newConfig = { ...config, elements: config.elements.filter((el) => el.id !== selectedId) };
+    pushHistory(newConfig);
     setSelectedId(null);
+  };
+
+  const duplicateElement = () => {
+    if (!selectedElement) return;
+    const duplicated = {
+      ...selectedElement,
+      id: `${selectedElement.type}-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`,
+      x: selectedElement.x + 20,
+      y: selectedElement.y + 20,
+    };
+    const newConfig = { ...config, elements: [...config.elements, duplicated] };
+    pushHistory(newConfig);
+    setSelectedId(duplicated.id);
   };
 
   const handleBackgroundChange = async (file: File) => {
@@ -99,10 +142,11 @@ export default function TemplateBuilder() {
       const objectUrl = URL.createObjectURL(file);
       const img = new Image();
       img.onload = () => {
-        setConfig((prev) => ({
-          ...prev,
+        const newConfig = {
+          ...config,
           canvas: { width: img.width, height: img.height },
-        }));
+        };
+        pushHistory(newConfig);
       };
       img.src = objectUrl;
       setBackgroundFile(file);
@@ -162,6 +206,9 @@ export default function TemplateBuilder() {
     }
   };
 
+  const canUndo = historyIndex > 0;
+  const canRedo = historyIndex < history.length - 1;
+
   return (
     <div style={{ padding: 16, display: 'flex', gap: 16, flexDirection: 'column', background: '#f8fafc', minHeight: '100vh', color: '#0f172a' }}>
       {authState.kind === 'unauth' && (
@@ -185,13 +232,6 @@ export default function TemplateBuilder() {
           </button>
         </div>
       )}
-      {authState.kind === 'error' && (
-        <div style={{ padding: 10, border: '1px solid #fca5a5', background: '#fef2f2', borderRadius: 6 }}>
-          {authState.message}
-        </div>
-      )}
-      {authState.kind !== 'authed' ? null : (
-      <>
       <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
         <input
           type="text"
@@ -208,13 +248,27 @@ export default function TemplateBuilder() {
             if (file) handleBackgroundChange(file);
           }}
         />
-        <button onClick={() => setConfig((prev) => ({ ...prev, elements: [...prev.elements, createTextField()] }))}>
+        <button onClick={() => pushHistory({ ...config, elements: [...config.elements, createTextField()] })}>
           + Text Field
         </button>
-        <button onClick={() => setConfig((prev) => ({ ...prev, elements: [...prev.elements, createTable()] }))}>
-          + Repeating Table
+        <button onClick={() => pushHistory({ ...config, elements: [...config.elements, createColumn()] })}>
+          + Column
         </button>
         <button onClick={handleDownloadExampleCsv}>Download Example CSV</button>
+        <button
+          onClick={undo}
+          disabled={!canUndo}
+          style={{ background: canUndo ? '#6b7280' : '#d1d5db', color: '#fff', padding: '8px 12px', borderRadius: 6, border: 'none' }}
+        >
+          Undo
+        </button>
+        <button
+          onClick={redo}
+          disabled={!canRedo}
+          style={{ background: canRedo ? '#6b7280' : '#d1d5db', color: '#fff', padding: '8px 12px', borderRadius: 6, border: 'none' }}
+        >
+          Redo
+        </button>
         <button
           onClick={handleSave}
           style={{ background: '#2563eb', color: '#fff', padding: '8px 12px', borderRadius: 6, border: 'none' }}
@@ -222,10 +276,6 @@ export default function TemplateBuilder() {
         >
           {status.kind === 'saving' ? 'Saving...' : 'Save Template'}
         </button>
-      </div>
-
-      <div style={{ border: '1px solid #e5e7eb', padding: 10, borderRadius: 8, background: '#f8fafc' }}>
-        Text fields read from the first row of your CSV (row 1). Use a Repeating Table for multi-row data like leaderboards.
       </div>
 
       {status.kind !== 'idle' && (
@@ -255,27 +305,16 @@ export default function TemplateBuilder() {
             stageRef={stageRef}
           />
         </div>
-        <div style={{ border: '1px solid #e5e7eb', padding: 12, borderRadius: 8, minHeight: 320, background: '#fff' }}>
-          {!selectedElement && (
-            <div>
-              <div>Select an element to edit its properties.</div>
-              <p style={{ marginTop: 8, color: '#334155', fontSize: 12 }}>
-                Single text fields read from the first CSV row. Repeating tables consume rows 1..maxRows.
-              </p>
-            </div>
-          )}
+        <div style={{ border: '1px solid #e5e7eb', padding: 12, borderRadius: 8, minHeight: 320 }}>
+          {!selectedElement && <div>Select an element to edit its properties.</div>}
           {selectedElement?.type === 'text' && (
             <FieldInspector field={selectedElement} onChange={setElement} onDelete={deleteElement} />
           )}
-          {selectedElement?.type === 'repeating-table' && (
-            <RepeatingTableInspector table={selectedElement} onChange={setElement} onDelete={deleteElement} />
+          {selectedElement?.type === 'column' && (
+            <ColumnInspector column={selectedElement} onChange={setElement} onDelete={deleteElement} onDuplicate={duplicateElement} />
           )}
         </div>
       </div>
-      </>
-      )}
     </div>
   );
 }
-
-

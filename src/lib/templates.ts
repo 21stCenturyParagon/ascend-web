@@ -18,9 +18,15 @@ export type TextField = {
 };
 
 export type TableColumn = {
+  id: string;
+  type: 'column';
   key: string;
   x: number;
+  y: number;
   width: number;
+  rowHeight: number;
+  rowGap: number;
+  maxRows: number;
   align: 'left' | 'center' | 'right';
   fontFamily: string;
   fontSize: number;
@@ -28,19 +34,7 @@ export type TableColumn = {
   fill: string;
 };
 
-export type RepeatingTable = {
-  id: string;
-  type: 'repeating-table';
-  groupKey: 'leaderboard';
-  x: number;
-  y: number;
-  rowHeight: number;
-  rowGap?: number;
-  maxRows: number;
-  columns: TableColumn[];
-};
-
-export type TemplateElement = TextField | RepeatingTable;
+export type TemplateElement = TextField | TableColumn;
 
 export type TemplateConfig = {
   canvas: { width: number; height: number };
@@ -190,11 +184,7 @@ export function buildExampleCsv(config: TemplateConfig): string {
 export function collectRequiredColumns(config: TemplateConfig): string[] {
   const set = new Set<string>();
   config.elements.forEach((el) => {
-    if (el.type === 'text') {
-      set.add(el.key);
-    } else if (el.type === 'repeating-table') {
-      el.columns.forEach((col) => set.add(col.key));
-    }
+    set.add(el.key);
   });
   return Array.from(set);
 }
@@ -202,26 +192,21 @@ export function collectRequiredColumns(config: TemplateConfig): string[] {
 // Build render-ready data from parsed CSV.
 export function mapCsvToTemplateData(config: TemplateConfig, rows: Record<string, string>[]) {
   const singleValues: Record<string, string> = {};
-  const tableRows: Record<string, string>[] = [];
+  const columnData: Record<string, string[]> = {};
 
   const firstRow = rows[0] || {};
   config.elements.forEach((el) => {
     if (el.type === 'text') {
       singleValues[el.key] = firstRow[el.key] ?? '';
-    } else if (el.type === 'repeating-table') {
+    } else if (el.type === 'column') {
+      // Extract column data up to maxRows
       const limit = el.maxRows;
-      const trimmed = rows.slice(0, limit).map((row) => {
-        const entry: Record<string, string> = {};
-        el.columns.forEach((col) => {
-          entry[col.key] = row[col.key] ?? '';
-        });
-        return entry;
-      });
-      tableRows.push(...trimmed);
+      const values = rows.slice(0, limit).map((row) => row[el.key] ?? '');
+      columnData[el.id] = values;
     }
   });
 
-  return { singleValues, tableRows };
+  return { singleValues, columnData };
 }
 
 // Helper to create a default blank config with given canvas size.

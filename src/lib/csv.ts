@@ -89,10 +89,9 @@ export function extractTableRows(
 }
 
 export function deriveMaxRows(config: TemplateConfig): number {
-  const table = config.elements.find((el) => el.type === 'repeating-table') as
-    | undefined
-    | { maxRows: number };
-  return table?.maxRows ?? 0;
+  const columns = config.elements.filter((el) => el.type === 'column') as Array<{ maxRows: number }>;
+  if (columns.length === 0) return 0;
+  return Math.max(...columns.map((col) => col.maxRows));
 }
 
 

@@ -4,12 +4,12 @@ import { Stage, Layer, Rect, Text, Group, Image as KonvaImage, Transformer } fro
 import useImage from 'use-image';
 import type { Stage as StageType } from 'konva/lib/Stage';
 import type { KonvaEventObject } from 'konva/lib/Node';
-import type { TemplateConfig, TemplateElement, TextField, RepeatingTable } from '../../lib/templates';
+import type { TemplateConfig, TemplateElement, TextField, TableColumn } from '../../lib/templates';
 import { loadFont } from '../../lib/fonts';
 
 type RenderData = {
   singleValues?: Record<string, string>;
-  tableRows?: Record<string, string>[];
+  columnData?: Record<string, string[]>;
 };
 
 type Props = {
@@ -22,13 +22,6 @@ type Props = {
   editable?: boolean;
   stageRef?: RefObject<StageType>;
 };
-
-const Placeholder: FC<{ text: string; width: number; height: number }> = ({ text, width, height }) => (
-  <Group>
-    <Rect width={width} height={height} stroke="#4b5563" dash={[6, 6]} cornerRadius={4} />
-    <Text text={text} width={width} height={height} align="center" verticalAlign="middle" fill="#4b5563" />
-  </Group>
-);
 
 const Background: FC<{ url?: string; width: number; height: number }> = ({ url, width, height }) => {
   const [image] = useImage(url || '');
@@ -60,8 +53,7 @@ export const CanvasEditor: FC<Props> = ({
   useEffect(() => {
     // Ensure fonts used in elements are loaded into the document.
     config.elements.forEach((el) => {
-      if (el.type === 'text') loadFont(el.fontFamily);
-      else el.columns.forEach((col) => loadFont(col.fontFamily));
+      loadFont(el.fontFamily);
     });
   }, [config.elements]);
 
@@ -166,139 +158,49 @@ export const CanvasEditor: FC<Props> = ({
     );
   };
 
-  const renderTable = (el: RepeatingTable) => {
-    const rows = data?.tableRows?.slice(0, el.maxRows) ?? [];
-    const showRows: Array<Record<string, string> | { __placeholder: number }> =
-      rows.length ? rows : Array.from({ length: el.maxRows }).map((_, idx) => ({ __placeholder: idx + 1 }));
-    const rowGap = el.rowGap ?? 0;
-    const handleColumnDrag = (colIdx: number, deltaX: number) => {
-      if (!onUpdateElement) return;
-      const updated = {
-        ...el,
-        columns: el.columns.map((c, i) => (i === colIdx ? { ...c, x: c.x + deltaX } : c)),
-      };
-      onUpdateElement(updated);
-    };
-
-    const handleColumnResize = (colIdx: number, newWidth: number) => {
-      if (!onUpdateElement) return;
-      const updated = {
-        ...el,
-        columns: el.columns.map((c, i) => (i === colIdx ? { ...c, width: newWidth } : c)),
-      };
-      onUpdateElement(updated);
-    };
+  const renderColumn = (el: TableColumn) => {
+    const values = data?.columnData?.[el.id] ?? [];
+    const showRows = values.length ? values : Array.from({ length: el.maxRows }).map((_, idx) => `Row ${idx + 1}`);
 
     return (
       <Group
         key={el.id}
         x={el.x}
         y={el.y}
-        draggable={false}
+        draggable={editable}
         name={`node-${el.id}`}
         onClick={(e) => {
           e.cancelBubble = true;
           onSelect?.(el.id);
         }}
+        onDragEnd={(evt) => handleDragEnd(el, evt)}
       >
-        {showRows.map((row, rowIndex) => {
-          const y = rowIndex * (el.rowHeight + rowGap);
+        {showRows.map((text, rowIndex) => {
+          const y = rowIndex * (el.rowHeight + el.rowGap);
           return (
             <Group key={`${el.id}-row-${rowIndex}`} y={y}>
-              {el.columns.map((col) => {
-                const x = col.x;
-                const text =
-                  '__placeholder' in row
-                    ? String(row.__placeholder)
-                    : (row as Record<string, string>)[col.key] ?? col.key;
-                return (
-                  <Group key={`${el.id}-row-${rowIndex}-col-${col.key}`} x={x}>
-                    <Rect
-                      width={col.width}
-                      height={el.rowHeight}
-                      stroke={selectedId === el.id ? '#2563eb' : '#d1d5db'}
-                      strokeWidth={1}
-                    />
-                    <Text
-                      text={text}
-                      width={col.width}
-                      height={el.rowHeight}
-                      fontFamily={col.fontFamily}
-                      fontSize={col.fontSize}
-                      fontStyle={col.fontWeight ? 'bold' : 'normal'}
-                      lineHeight={1.2}
-                      fill={col.fill}
-                      align={col.align}
-                      verticalAlign="middle"
-                      padding={4}
-                    />
-                  </Group>
-                );
-              })}
+              <Rect
+                width={el.width}
+                height={el.rowHeight}
+                stroke={selectedId === el.id ? '#2563eb' : '#d1d5db'}
+                strokeWidth={1}
+              />
+              <Text
+                text={text}
+                width={el.width}
+                height={el.rowHeight}
+                fontFamily={el.fontFamily}
+                fontSize={el.fontSize}
+                fontStyle={el.fontWeight ? 'bold' : 'normal'}
+                lineHeight={1.2}
+                fill={el.fill}
+                align={el.align}
+                verticalAlign="middle"
+                padding={4}
+              />
             </Group>
           );
         })}
-        {!showRows.length && <Placeholder text="Repeating table" width={200} height={el.rowHeight} />}
-
-        {editable && (
-          <Group>
-            {el.columns.map((col, colIdx) => (
-              <Group
-                key={`${el.id}-col-handle-${col.key}`}
-                x={col.x}
-                y={-18}
-              >
-                <Rect
-                  width={col.width}
-                  height={16}
-                  fill="rgba(37,99,235,0.08)"
-                  stroke="#2563eb"
-                  cornerRadius={4}
-                  draggable
-                  onDragMove={(evt) => {
-                    const newX = evt.target.x();
-                    handleColumnDrag(colIdx, newX);
-                    evt.target.x(0);
-                  }}
-                  onDragEnd={(evt) => {
-                    evt.target.position({ x: 0, y: -18 });
-                  }}
-                />
-                <Text
-                  text={col.key}
-                  width={col.width}
-                  height={16}
-                  align="center"
-                  verticalAlign="middle"
-                  fontSize={12}
-                  fill="#2563eb"
-                  fontStyle="bold"
-                  listening={false}
-                />
-                <Rect
-                  x={col.width - 6}
-                  y={0}
-                  width={12}
-                  height={16}
-                  fill="rgba(37,99,235,0.3)"
-                  stroke="#2563eb"
-                  strokeWidth={1}
-                  draggable
-                  dragBoundFunc={(pos) => ({ x: Math.max(20, pos.x), y: 0 })}
-                  onDragMove={(evt) => {
-                    const deltaX = evt.target.x() - (col.width - 6);
-                    const newWidth = Math.max(40, col.width + deltaX);
-                    handleColumnResize(colIdx, newWidth);
-                    evt.target.x(col.width - 6);
-                  }}
-                  onDragEnd={(evt) => {
-                    evt.target.position({ x: col.width - 6, y: 0 });
-                  }}
-                />
-              </Group>
-            ))}
-          </Group>
-        )}
       </Group>
     );
   };
@@ -315,7 +217,7 @@ export const CanvasEditor: FC<Props> = ({
         <Background url={backgroundUrl} width={config.canvas.width} height={config.canvas.height} />
       </Layer>
       <Layer>
-        {config.elements.map((el) => (el.type === 'text' ? renderTextField(el) : renderTable(el)))}
+        {config.elements.map((el) => (el.type === 'text' ? renderTextField(el) : renderColumn(el)))}
         {editable && (
           <Transformer
             ref={transformerRef}
