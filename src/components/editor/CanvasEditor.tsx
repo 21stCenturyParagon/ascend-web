@@ -81,7 +81,7 @@ export const CanvasEditor: FC<Props> = ({
       transformer.nodes([]);
     }
     transformer.getLayer()?.batchDraw();
-  }, [selectedNodeName, currentStageRef]);
+  }, [selectedNodeName, selectedElement, currentStageRef]);
 
   const handleStageClick = () => {
     if (onSelect) onSelect(null);
@@ -195,7 +195,7 @@ export const CanvasEditor: FC<Props> = ({
         {showRows.map((row, rowIndex) => {
           const y = rowIndex * (el.rowHeight + rowGap);
           return (
-            <Group key={`${el.id}-row-${rowIndex}`} y={y} listening={false}>
+            <Group key={`${el.id}-row-${rowIndex}`} y={y}>
               {el.columns.map((col) => {
                 const x = col.x;
                 const text =
@@ -203,7 +203,7 @@ export const CanvasEditor: FC<Props> = ({
                     ? String(row.__placeholder)
                     : (row as Record<string, string>)[col.key] ?? col.key;
                 return (
-                  <Group key={`${el.id}-row-${rowIndex}-col-${col.key}`} x={x} listening={false}>
+                  <Group key={`${el.id}-row-${rowIndex}-col-${col.key}`} x={x}>
                     <Rect
                       width={col.width}
                       height={el.rowHeight}
@@ -232,14 +232,13 @@ export const CanvasEditor: FC<Props> = ({
         {!showRows.length && <Placeholder text="Repeating table" width={200} height={el.rowHeight} />}
 
         {editable && (
-          <Group>
+          <Group listening={false}>
             {el.columns.map((col, colIdx) => (
               <Group
                 key={`${el.id}-col-handle-${col.key}`}
                 x={col.x}
                 y={-18}
-                onMouseDown={(e) => (e.cancelBubble = true)}
-                onDragStart={(e) => (e.cancelBubble = true)}
+                listening
               >
                 <Rect
                   width={col.width}
@@ -258,8 +257,12 @@ export const CanvasEditor: FC<Props> = ({
                     evt.cancelBubble = true;
                     evt.target.position({ x: 0, y: -18 });
                   }}
-                  onMouseDown={(evt) => (evt.cancelBubble = true)}
-                  onTouchStart={(evt) => (evt.cancelBubble = true)}
+                  onMouseDown={(evt) => {
+                    evt.cancelBubble = true;
+                  }}
+                  onTouchStart={(evt) => {
+                    evt.cancelBubble = true;
+                  }}
                 />
                 <Text
                   text={col.key}
@@ -270,6 +273,7 @@ export const CanvasEditor: FC<Props> = ({
                   fontSize={12}
                   fill="#2563eb"
                   fontStyle="bold"
+                  listening={false}
                 />
                 <Rect
                   x={col.width - 6}
@@ -290,8 +294,12 @@ export const CanvasEditor: FC<Props> = ({
                     evt.cancelBubble = true;
                     evt.target.position({ x: col.width - 6, y: 0 });
                   }}
-                  onMouseDown={(evt) => (evt.cancelBubble = true)}
-                  onTouchStart={(evt) => (evt.cancelBubble = true)}
+                  onMouseDown={(evt) => {
+                    evt.cancelBubble = true;
+                  }}
+                  onTouchStart={(evt) => {
+                    evt.cancelBubble = true;
+                  }}
                 />
               </Group>
             ))}
