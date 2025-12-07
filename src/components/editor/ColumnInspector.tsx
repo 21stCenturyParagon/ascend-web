@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { TableColumn } from '../../lib/templates';
-import { loadFont, GOOGLE_FONTS } from '../../lib/fonts';
+import { loadFont, DEFAULT_FONTS, fetchGoogleFonts } from '../../lib/fonts';
 
 type Props = {
   column: TableColumn;
@@ -10,22 +10,18 @@ type Props = {
 };
 
 export default function ColumnInspector({ column, onChange, onDelete, onDuplicate }: Props) {
-  const [fonts, setFonts] = useState<string[]>(GOOGLE_FONTS);
+  const [fonts, setFonts] = useState<string[]>(DEFAULT_FONTS);
 
   useEffect(() => {
-    const fetchFonts = async () => {
+    const loadFonts = async () => {
       try {
-        const apiKey = import.meta.env.VITE_GOOGLE_FONTS_API_KEY || 'AIzaSyBqYEyg4_jRAltlga75x19GEIxcobATj7g';
-        const res = await fetch(`https://www.googleapis.com/webfonts/v1/webfonts?key=${apiKey}&sort=popularity`);
-        if (!res.ok) throw new Error('Failed to fetch fonts');
-        const data = await res.json();
-        const fontList = data.items.map((item: { family: string }) => item.family).slice(0, 100);
-        setFonts(fontList);
+        const fontList = await fetchGoogleFonts();
+        setFonts(fontList.slice(0, 100));
       } catch (err) {
         console.warn('Using default font list:', err);
       }
     };
-    fetchFonts();
+    loadFonts();
   }, []);
 
   const handleFontChange = (fontFamily: string) => {

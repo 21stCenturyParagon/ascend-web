@@ -1,4 +1,4 @@
-const DEFAULT_FONTS = [
+export const DEFAULT_FONTS = [
   'Inter',
   'Roboto',
   'Poppins',
