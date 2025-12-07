@@ -73,17 +73,20 @@ export async function signOut(): Promise<void> {
 }
 
 // OAuth: start Discord sign-in using PKCE. Redirect back to /auth/callback
-export async function signInWithDiscord(redirectPath: string = '/auth/callback'): Promise<void> {
+export async function signInWithDiscord(finalDestination: string = '/templates'): Promise<void> {
   const client = getSupabase();
   try {
+    // Store the final destination for AuthCallback to use
+    sessionStorage.setItem('auth_return_url', finalDestination);
+    
     const siteOrigin = getSiteOrigin();
-    const isAbsolute = /^https?:\/\//i.test(redirectPath);
-    const normalizedPath = redirectPath.startsWith('/') ? redirectPath : `/${redirectPath}`;
-    const redirectTo = isAbsolute ? redirectPath : `${siteOrigin}${normalizedPath}`;
+    // Always redirect to /auth/callback first, which will then redirect to finalDestination
+    const callbackUrl = `${siteOrigin}/auth/callback`;
+    
     const { data, error } = await client.auth.signInWithOAuth({
       provider: 'discord',
       options: {
-        redirectTo,
+        redirectTo: callbackUrl,
         scopes: 'identify email guilds',
       },
     });

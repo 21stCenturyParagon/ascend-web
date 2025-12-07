@@ -5,6 +5,7 @@ import CanvasEditor from '../components/editor/CanvasEditor';
 import type { TemplateConfig, TemplateRecord } from '../lib/templates';
 import { getPublicImageUrl, getTemplateById, mapCsvToTemplateData, buildExampleCsv } from '../lib/templates';
 import { deriveMaxRows, extractTableRows, parseCsvFile, validateCsvHeaders } from '../lib/csv';
+import { getSupabase, signInWithDiscord } from '../lib/supabase';
 
 type Status = { kind: 'idle' | 'loading' | 'error' | 'ready'; message?: string };
 
@@ -32,12 +33,24 @@ export default function UseTemplate() {
 
   useEffect(() => {
     const load = async () => {
-      const id = getTemplateIdFromPath();
-      if (!id) {
-        setStatus({ kind: 'error', message: 'Template ID not found in URL.' });
-        return;
-      }
       try {
+        // Check authentication first
+        const client = getSupabase();
+        const { data: sessionData } = await client.auth.getSession();
+        
+        if (!sessionData.session) {
+          // Not authenticated - redirect to sign in
+          const currentPath = window.location.pathname;
+          await signInWithDiscord(currentPath);
+          return;
+        }
+        
+        const id = getTemplateIdFromPath();
+        if (!id) {
+          setStatus({ kind: 'error', message: 'Template ID not found in URL.' });
+          return;
+        }
+        
         const res = await getTemplateById(id);
         if (!res.ok) {
           setStatus({ kind: 'error', message: res.error });

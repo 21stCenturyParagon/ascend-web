@@ -78,7 +78,8 @@ export default function TemplateBuilder() {
         const { data, error } = await client.auth.getSession();
         if (error) throw error;
         if (!data.session) {
-          setAuthState({ kind: 'unauth', message: 'Sign in to create templates.' });
+          // Redirect to sign in
+          await signInWithDiscord('/templates/new');
           return;
         }
         setAuthState({ kind: 'authed' });
@@ -252,23 +253,23 @@ export default function TemplateBuilder() {
   const canUndo = historyIndex > 0;
   const canRedo = historyIndex < history.length - 1;
 
+  // Show loading state while checking auth
+  if (authState.kind === 'loading') {
+    return (
+      <div style={{ background: '#f8fafc', minHeight: '100vh', color: '#0f172a' }}>
+        <TemplateNav />
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
+          <span>Checking authentication...</span>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div style={{ background: '#f8fafc', minHeight: '100vh', color: '#0f172a' }}>
       <TemplateNav />
       
       <main style={{ padding: 16, maxWidth: '100%', margin: '0 auto' }}>
-        {/* Auth warning banner */}
-        {authState.kind === 'unauth' && (
-          <div style={authBannerStyle}>
-            <span>⚠️ Sign in to save templates and upload backgrounds.</span>
-            <button
-              onClick={() => signInWithDiscord('/templates/new')}
-              style={signInBtnStyle}
-            >
-              Sign in with Discord
-            </button>
-          </div>
-        )}
 
         {/* Toolbar */}
         <div style={toolbarStyle}>
@@ -405,27 +406,6 @@ export default function TemplateBuilder() {
 }
 
 // Styles
-const authBannerStyle: React.CSSProperties = {
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  padding: '12px 16px',
-  background: '#fffbeb',
-  border: '1px solid #fbbf24',
-  borderRadius: 8,
-  marginBottom: 16,
-};
-
-const signInBtnStyle: React.CSSProperties = {
-  background: '#2563eb',
-  color: '#fff',
-  padding: '8px 16px',
-  border: 'none',
-  borderRadius: 6,
-  cursor: 'pointer',
-  fontWeight: 500,
-};
-
 const toolbarStyle: React.CSSProperties = {
   display: 'flex',
   alignItems: 'center',

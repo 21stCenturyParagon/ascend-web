@@ -6,28 +6,44 @@ export default function AuthCallback() {
 
   function getReturnUrl(): string {
     try {
-      // Check if there's a stored return URL in sessionStorage
+      // 1. Check sessionStorage for stored destination (set by signInWithDiscord)
       const stored = sessionStorage.getItem('auth_return_url');
-      console.log('AuthCallback - sessionStorage auth_return_url:', stored);
       if (stored) {
         sessionStorage.removeItem('auth_return_url');
-        console.log('AuthCallback - Using stored URL:', stored);
+        console.log('AuthCallback - Using stored destination:', stored);
         return stored;
       }
-      // Fallback: read from URL query param 'next'
+      
+      // 2. Check URL query param 'next'
       const u = new URL(window.location.href);
       const nextParam = u.searchParams.get('next');
-      console.log('AuthCallback - URL next param:', nextParam);
-      console.log('AuthCallback - Full callback URL:', window.location.href);
       if (nextParam) {
         console.log('AuthCallback - Using next param:', nextParam);
         return nextParam;
       }
+      
+      // 3. Check if redirected from a specific page (referrer)
+      if (document.referrer) {
+        try {
+          const referrerUrl = new URL(document.referrer);
+          const referrerPath = referrerUrl.pathname;
+          // If coming from a template-related page, preserve it
+          if (referrerPath.startsWith('/templates')) {
+            console.log('AuthCallback - Using referrer path:', referrerPath);
+            return referrerPath;
+          }
+        } catch {
+          // Invalid referrer URL
+        }
+      }
+      
+      // 4. Default fallback for registration flow
+      console.log('AuthCallback - Using default fallback: /register/details');
+      return '/register/details';
     } catch (e) {
       console.error('AuthCallback - Error reading return URL:', e);
+      return '/register/details';
     }
-    console.log('AuthCallback - Using default: /register/details');
-    return '/register/details';
   }
 
   useEffect(() => {

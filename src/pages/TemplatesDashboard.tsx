@@ -2,16 +2,30 @@ import { useEffect, useState } from 'react';
 import TemplateNav from '../components/TemplateNav';
 import type { TemplateRecord } from '../lib/templates';
 import { listTemplates, getPublicImageUrl } from '../lib/templates';
+import { getSupabase, signInWithDiscord } from '../lib/supabase';
 
 type Status = { kind: 'loading' | 'error' | 'ready'; message?: string };
 
 export default function TemplatesDashboard() {
   const [status, setStatus] = useState<Status>({ kind: 'loading' });
   const [templates, setTemplates] = useState<TemplateRecord[]>([]);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
     const init = async () => {
       try {
+        // Check authentication first
+        const client = getSupabase();
+        const { data: sessionData } = await client.auth.getSession();
+        
+        if (!sessionData.session) {
+          // Not authenticated - redirect to sign in
+          await signInWithDiscord('/templates');
+          return;
+        }
+        
+        setIsAuthenticated(true);
+        
         const res = await listTemplates();
         if (!res.ok) {
           setStatus({ kind: 'error', message: res.error });
@@ -26,6 +40,17 @@ export default function TemplatesDashboard() {
     };
     void init();
   }, []);
+
+  if (!isAuthenticated) {
+    return (
+      <div style={pageStyle}>
+        <div style={loadingStyle}>
+          <div style={spinnerStyle} />
+          <span>Checking authentication...</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={pageStyle}>
