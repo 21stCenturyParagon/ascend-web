@@ -17,3 +17,15 @@ body { margin: 0; min-width: 320px; background: #f8fafc; color: #0f172a; }
 a { color: inherit; }
 
 input::placeholder { color: rgba(100,116,139,0.8); }
+
+/* Spinner animation */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Card hover effect */
+article:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  transform: translateY(-2px);
+}

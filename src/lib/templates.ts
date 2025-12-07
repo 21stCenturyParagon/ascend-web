@@ -51,6 +51,7 @@ export type TemplateRecord = {
   height: number;
   background_path: string;
   config: TemplateConfig;
+  author_name: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -63,6 +64,7 @@ type SaveTemplateInput = {
   name: string;
   config: TemplateConfig;
   backgroundPath: string;
+  authorName?: string;
 };
 
 function randomId(): string {
@@ -125,6 +127,17 @@ export async function saveTemplate(input: SaveTemplateInput): Promise<OperationR
     const userResult = await requireUserId();
     if (!userResult.ok) return userResult;
     const client = getSupabase();
+    
+    // Get user's display name if not provided
+    let authorName = input.authorName;
+    if (!authorName) {
+      const { data: userData } = await client.auth.getUser();
+      authorName = userData?.user?.user_metadata?.full_name 
+        || userData?.user?.user_metadata?.name
+        || userData?.user?.email?.split('@')[0]
+        || 'Anonymous';
+    }
+    
     const payload = {
       id: input.id,
       user_id: userResult.data.userId,
@@ -133,6 +146,7 @@ export async function saveTemplate(input: SaveTemplateInput): Promise<OperationR
       height: input.config.canvas.height,
       background_path: input.backgroundPath,
       config: input.config,
+      author_name: authorName,
     };
 
     const { data, error } = await client

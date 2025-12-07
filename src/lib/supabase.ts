@@ -60,6 +60,18 @@ export async function addToWaitlist(email: string): Promise<{ success: boolean; 
   }
 }
 
+// Sign out the current user
+export async function signOut(): Promise<void> {
+  const client = getSupabase();
+  try {
+    const { error } = await client.auth.signOut();
+    if (error) throw error;
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Unknown error signing out';
+    throw new Error(message);
+  }
+}
+
 // OAuth: start Discord sign-in using PKCE. Redirect back to /auth/callback
 export async function signInWithDiscord(redirectPath: string = '/auth/callback'): Promise<void> {
   const client = getSupabase();

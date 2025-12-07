@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import TemplateNav from '../components/TemplateNav';
 import CanvasEditor from '../components/editor/CanvasEditor';
 import FieldInspector from '../components/editor/FieldInspector';
 import ColumnInspector from '../components/editor/ColumnInspector';
@@ -245,119 +246,301 @@ export default function TemplateBuilder() {
   const canRedo = historyIndex < history.length - 1;
 
   return (
-    <div style={{ padding: 16, display: 'flex', gap: 16, flexDirection: 'column', background: '#f8fafc', minHeight: '100vh', color: '#0f172a' }}>
-      {authState.kind === 'unauth' && (
-        <div
-          style={{
-            padding: 12,
-            border: '1px solid #e5e7eb',
-            borderRadius: 8,
-            background: '#fff',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-          }}
-        >
-          <div>Sign in to save templates and upload backgrounds.</div>
-          <button
-            onClick={() => signInWithDiscord('/templates')}
-            style={{ background: '#2563eb', color: '#fff', padding: '8px 12px', border: 'none', borderRadius: 6 }}
-          >
-            Sign in with Discord
-          </button>
-        </div>
-      )}
-      <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
-        <input
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Template name"
-          style={{ padding: 8, minWidth: 240 }}
-        />
-        <input
-          type="file"
-          accept="image/*"
-          onChange={(e) => {
-            const file = e.target.files?.[0];
-            if (file) handleBackgroundChange(file);
-          }}
-        />
-        <button onClick={() => {
-          const newField = createTextField();
-          newField.key = generateUniqueKey(newField.key);
-          pushHistory({ ...config, elements: [...config.elements, newField] });
-        }}>
-          + Text Field
-        </button>
-        <button onClick={() => {
-          const newCol = createColumn();
-          newCol.key = generateUniqueKey(newCol.key);
-          pushHistory({ ...config, elements: [...config.elements, newCol] });
-        }}>
-          + Column
-        </button>
-        <button onClick={handleDownloadExampleCsv}>Download Example CSV</button>
-        <button
-          onClick={undo}
-          disabled={!canUndo}
-          style={{ background: canUndo ? '#6b7280' : '#d1d5db', color: '#fff', padding: '8px 12px', borderRadius: 6, border: 'none' }}
-        >
-          Undo
-        </button>
-        <button
-          onClick={redo}
-          disabled={!canRedo}
-          style={{ background: canRedo ? '#6b7280' : '#d1d5db', color: '#fff', padding: '8px 12px', borderRadius: 6, border: 'none' }}
-        >
-          Redo
-        </button>
-        <button
-          onClick={handleSave}
-          style={{ background: '#2563eb', color: '#fff', padding: '8px 12px', borderRadius: 6, border: 'none' }}
-          disabled={status.kind === 'saving'}
-        >
-          {status.kind === 'saving' ? 'Saving...' : 'Save Template'}
-        </button>
-      </div>
+    <div style={{ background: '#f8fafc', minHeight: '100vh', color: '#0f172a' }}>
+      <TemplateNav />
+      
+      <main style={{ padding: 16, maxWidth: 1400, margin: '0 auto' }}>
+        {/* Auth warning banner */}
+        {authState.kind === 'unauth' && (
+          <div style={authBannerStyle}>
+            <span>⚠️ Sign in to save templates and upload backgrounds.</span>
+            <button
+              onClick={() => signInWithDiscord('/templates/new')}
+              style={signInBtnStyle}
+            >
+              Sign in with Discord
+            </button>
+          </div>
+        )}
 
-      {status.kind !== 'idle' && (
-        <div
-          style={{
-            padding: 10,
-            border: '1px solid',
+        {/* Toolbar */}
+        <div style={toolbarStyle}>
+          <div style={toolbarLeft}>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Template name"
+              style={nameInputStyle}
+            />
+            <label style={fileInputLabel}>
+              📷 Upload Background
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) handleBackgroundChange(file);
+                }}
+                style={{ display: 'none' }}
+              />
+            </label>
+          </div>
+          
+          <div style={toolbarCenter}>
+            <button onClick={() => {
+              const newField = createTextField();
+              newField.key = generateUniqueKey(newField.key);
+              pushHistory({ ...config, elements: [...config.elements, newField] });
+            }} style={addBtnStyle}>
+              + Text
+            </button>
+            <button onClick={() => {
+              const newCol = createColumn();
+              newCol.key = generateUniqueKey(newCol.key);
+              pushHistory({ ...config, elements: [...config.elements, newCol] });
+            }} style={addBtnStyle}>
+              + Column
+            </button>
+            <div style={dividerStyle} />
+            <button onClick={undo} disabled={!canUndo} style={iconBtnStyle} title="Undo">
+              ↩️
+            </button>
+            <button onClick={redo} disabled={!canRedo} style={iconBtnStyle} title="Redo">
+              ↪️
+            </button>
+          </div>
+
+          <div style={toolbarRight}>
+            <button onClick={handleDownloadExampleCsv} style={secondaryBtnStyle}>
+              📄 Example CSV
+            </button>
+            <button
+              onClick={handleSave}
+              style={saveBtnStyle}
+              disabled={status.kind === 'saving' || authState.kind !== 'authed'}
+            >
+              {status.kind === 'saving' ? 'Saving...' : '💾 Save Template'}
+            </button>
+          </div>
+        </div>
+
+        {/* Status message */}
+        {status.kind !== 'idle' && (
+          <div style={{
+            ...statusStyle,
             borderColor: status.kind === 'error' ? '#ef4444' : '#10b981',
             color: status.kind === 'error' ? '#991b1b' : '#065f46',
             background: status.kind === 'error' ? '#fef2f2' : '#ecfdf3',
-            borderRadius: 6,
-          }}
-        >
-          {status.message}
-        </div>
-      )}
+          }}>
+            {status.kind === 'error' ? '❌' : '✅'} {status.message}
+          </div>
+        )}
 
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 16, alignItems: 'flex-start' }}>
-        <div style={{ overflow: 'auto' }}>
-          <CanvasEditor
-            backgroundUrl={backgroundUrl}
-            config={config}
-            selectedId={selectedId}
-            onSelect={setSelectedId}
-            onUpdateElement={setElement}
-            editable
-            stageRef={stageRef}
-          />
+        {/* Main editor area */}
+        <div style={editorLayoutStyle}>
+          <div style={canvasContainerStyle}>
+            <CanvasEditor
+              backgroundUrl={backgroundUrl}
+              config={config}
+              selectedId={selectedId}
+              onSelect={setSelectedId}
+              onUpdateElement={setElement}
+              editable
+              stageRef={stageRef}
+            />
+          </div>
+          
+          <div style={inspectorPanelStyle}>
+            <h3 style={inspectorTitleStyle}>Properties</h3>
+            {!selectedElement && (
+              <div style={emptyInspectorStyle}>
+                <span style={{ fontSize: 32 }}>👆</span>
+                <p>Select an element on the canvas to edit its properties</p>
+              </div>
+            )}
+            {selectedElement?.type === 'text' && (
+              <FieldInspector 
+                field={selectedElement} 
+                onChange={setElement} 
+                onDelete={deleteElement} 
+                onDuplicate={duplicateElement} 
+              />
+            )}
+            {selectedElement?.type === 'column' && (
+              <ColumnInspector 
+                column={selectedElement} 
+                onChange={setElement} 
+                onDelete={deleteElement} 
+                onDuplicate={duplicateElement} 
+              />
+            )}
+          </div>
         </div>
-        <div style={{ border: '1px solid #e5e7eb', padding: 12, borderRadius: 8, minHeight: 320 }}>
-          {!selectedElement && <div>Select an element to edit its properties.</div>}
-          {selectedElement?.type === 'text' && (
-            <FieldInspector field={selectedElement} onChange={setElement} onDelete={deleteElement} onDuplicate={duplicateElement} />
-          )}
-          {selectedElement?.type === 'column' && (
-            <ColumnInspector column={selectedElement} onChange={setElement} onDelete={deleteElement} onDuplicate={duplicateElement} />
-          )}
-        </div>
-      </div>
+      </main>
     </div>
   );
 }
+
+// Styles
+const authBannerStyle: React.CSSProperties = {
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  padding: '12px 16px',
+  background: '#fffbeb',
+  border: '1px solid #fbbf24',
+  borderRadius: 8,
+  marginBottom: 16,
+};
+
+const signInBtnStyle: React.CSSProperties = {
+  background: '#2563eb',
+  color: '#fff',
+  padding: '8px 16px',
+  border: 'none',
+  borderRadius: 6,
+  cursor: 'pointer',
+  fontWeight: 500,
+};
+
+const toolbarStyle: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  padding: '12px 16px',
+  background: '#fff',
+  border: '1px solid #e5e7eb',
+  borderRadius: 8,
+  marginBottom: 16,
+  gap: 16,
+  flexWrap: 'wrap',
+};
+
+const toolbarLeft: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: 12,
+};
+
+const toolbarCenter: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: 8,
+};
+
+const toolbarRight: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: 8,
+};
+
+const nameInputStyle: React.CSSProperties = {
+  padding: '8px 12px',
+  border: '1px solid #e5e7eb',
+  borderRadius: 6,
+  fontSize: 14,
+  minWidth: 200,
+};
+
+const fileInputLabel: React.CSSProperties = {
+  padding: '8px 12px',
+  background: '#f1f5f9',
+  border: '1px solid #e5e7eb',
+  borderRadius: 6,
+  cursor: 'pointer',
+  fontSize: 13,
+  fontWeight: 500,
+};
+
+const addBtnStyle: React.CSSProperties = {
+  padding: '8px 14px',
+  background: '#f1f5f9',
+  border: '1px solid #e5e7eb',
+  borderRadius: 6,
+  cursor: 'pointer',
+  fontSize: 13,
+  fontWeight: 500,
+};
+
+const iconBtnStyle: React.CSSProperties = {
+  padding: '6px 10px',
+  background: '#fff',
+  border: '1px solid #e5e7eb',
+  borderRadius: 6,
+  cursor: 'pointer',
+  fontSize: 16,
+};
+
+const dividerStyle: React.CSSProperties = {
+  width: 1,
+  height: 24,
+  background: '#e5e7eb',
+  margin: '0 4px',
+};
+
+const secondaryBtnStyle: React.CSSProperties = {
+  padding: '8px 12px',
+  background: '#fff',
+  border: '1px solid #e5e7eb',
+  borderRadius: 6,
+  cursor: 'pointer',
+  fontSize: 13,
+  fontWeight: 500,
+};
+
+const saveBtnStyle: React.CSSProperties = {
+  padding: '8px 16px',
+  background: '#2563eb',
+  color: '#fff',
+  border: 'none',
+  borderRadius: 6,
+  cursor: 'pointer',
+  fontSize: 14,
+  fontWeight: 600,
+};
+
+const statusStyle: React.CSSProperties = {
+  padding: '10px 14px',
+  border: '1px solid',
+  borderRadius: 6,
+  marginBottom: 16,
+  fontSize: 14,
+};
+
+const editorLayoutStyle: React.CSSProperties = {
+  display: 'grid',
+  gridTemplateColumns: '1fr 320px',
+  gap: 16,
+  alignItems: 'flex-start',
+};
+
+const canvasContainerStyle: React.CSSProperties = {
+  background: '#fff',
+  border: '1px solid #e5e7eb',
+  borderRadius: 8,
+  padding: 16,
+  overflow: 'auto',
+};
+
+const inspectorPanelStyle: React.CSSProperties = {
+  background: '#fff',
+  border: '1px solid #e5e7eb',
+  borderRadius: 8,
+  padding: 16,
+  minHeight: 400,
+};
+
+const inspectorTitleStyle: React.CSSProperties = {
+  margin: '0 0 16px',
+  fontSize: 16,
+  fontWeight: 600,
+  paddingBottom: 12,
+  borderBottom: '1px solid #e5e7eb',
+};
+
+const emptyInspectorStyle: React.CSSProperties = {
+  textAlign: 'center',
+  color: '#6b7280',
+  padding: '32px 16px',
+};
