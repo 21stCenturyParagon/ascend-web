@@ -25,7 +25,8 @@ type Props = {
 };
 
 const Background: FC<{ url?: string; width: number; height: number }> = ({ url, width, height }) => {
-  const [image] = useImage(url || '');
+  // Use 'anonymous' crossOrigin to allow toDataURL() export
+  const [image] = useImage(url || '', 'anonymous');
   if (!url || !image) return null;
   return <KonvaImage image={image} width={width} height={height} listening={false} />;
 };

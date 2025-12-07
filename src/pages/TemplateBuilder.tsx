@@ -87,6 +87,25 @@ export default function TemplateBuilder() {
     [config.elements, selectedId],
   );
 
+  // Get all existing keys except the one being edited
+  const getExistingKeys = (excludeId?: string) => {
+    return new Set(config.elements.filter((el) => el.id !== excludeId).map((el) => el.key));
+  };
+
+  // Generate a unique key by appending a number suffix
+  const generateUniqueKey = (baseKey: string, excludeId?: string): string => {
+    const existingKeys = getExistingKeys(excludeId);
+    if (!existingKeys.has(baseKey)) return baseKey;
+    
+    let counter = 2;
+    let newKey = `${baseKey}_${counter}`;
+    while (existingKeys.has(newKey)) {
+      counter++;
+      newKey = `${baseKey}_${counter}`;
+    }
+    return newKey;
+  };
+
   const pushHistory = (newConfig: TemplateConfig) => {
     const newHistory = history.slice(0, historyIndex + 1);
     newHistory.push(newConfig);
@@ -112,11 +131,22 @@ export default function TemplateBuilder() {
   };
 
   const setElement = (updated: TemplateElement) => {
+    // Check for duplicate keys (excluding the element being updated)
+    const existingKeys = getExistingKeys(updated.id);
+    if (existingKeys.has(updated.key)) {
+      setStatus({ kind: 'error', message: `Key "${updated.key}" is already used by another element. Please use a unique key.` });
+      return;
+    }
+    
     const newConfig = {
       ...config,
       elements: config.elements.map((el) => (el.id === updated.id ? updated : el)),
     };
     pushHistory(newConfig);
+    // Clear error if there was one
+    if (status.kind === 'error' && status.message?.includes('already used')) {
+      setStatus({ kind: 'idle' });
+    }
   };
 
   const deleteElement = () => {
@@ -128,9 +158,12 @@ export default function TemplateBuilder() {
 
   const duplicateElement = () => {
     if (!selectedElement) return;
+    const newId = `${selectedElement.type}-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`;
+    const newKey = generateUniqueKey(selectedElement.key);
     const duplicated = {
       ...selectedElement,
-      id: `${selectedElement.type}-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`,
+      id: newId,
+      key: newKey,
       x: selectedElement.x + 20,
       y: selectedElement.y + 20,
     };
@@ -250,10 +283,18 @@ export default function TemplateBuilder() {
             if (file) handleBackgroundChange(file);
           }}
         />
-        <button onClick={() => pushHistory({ ...config, elements: [...config.elements, createTextField()] })}>
+        <button onClick={() => {
+          const newField = createTextField();
+          newField.key = generateUniqueKey(newField.key);
+          pushHistory({ ...config, elements: [...config.elements, newField] });
+        }}>
           + Text Field
         </button>
-        <button onClick={() => pushHistory({ ...config, elements: [...config.elements, createColumn()] })}>
+        <button onClick={() => {
+          const newCol = createColumn();
+          newCol.key = generateUniqueKey(newCol.key);
+          pushHistory({ ...config, elements: [...config.elements, newCol] });
+        }}>
           + Column
         </button>
         <button onClick={handleDownloadExampleCsv}>Download Example CSV</button>

@@ -105,17 +105,34 @@ export default function UseTemplate() {
     try {
       const stage = stageRef.current;
       if (!stage) {
-        setStatus({ kind: 'error', message: 'Nothing to download yet.' });
+        setStatus({ kind: 'error', message: 'Canvas not ready. Please wait for the template to fully load.' });
         return;
       }
-      const uri: string = stage.toDataURL({ pixelRatio: 2 });
+      
+      // Get the Konva stage instance
+      const konvaStage = stage.getStage ? stage.getStage() : stage;
+      if (!konvaStage || typeof konvaStage.toDataURL !== 'function') {
+        setStatus({ kind: 'error', message: 'Unable to access canvas. Please refresh and try again.' });
+        return;
+      }
+
+      const uri: string = konvaStage.toDataURL({ pixelRatio: 2, mimeType: 'image/png' });
       const link = document.createElement('a');
       link.href = uri;
-      link.download = `${template?.name || 'filled-template'}.png`;
+      link.download = `${template?.name?.replace(/[^a-zA-Z0-9]/g, '_') || 'filled-template'}.png`;
+      document.body.appendChild(link);
       link.click();
+      document.body.removeChild(link);
+      setStatus({ kind: 'ready', message: 'Image downloaded successfully!' });
     } catch (err) {
+      console.error('Download error:', err);
       const message = err instanceof Error ? err.message : 'Unable to download image.';
-      setStatus({ kind: 'error', message });
+      // Check for common CORS error
+      if (message.includes('tainted') || message.includes('cross-origin') || message.includes('SecurityError')) {
+        setStatus({ kind: 'error', message: 'Cannot export image due to cross-origin restrictions. The background image may not be accessible.' });
+      } else {
+        setStatus({ kind: 'error', message: `Download failed: ${message}` });
+      }
     }
   };
 
