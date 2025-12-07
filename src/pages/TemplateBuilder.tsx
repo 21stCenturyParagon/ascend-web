@@ -249,7 +249,7 @@ export default function TemplateBuilder() {
     <div style={{ background: '#f8fafc', minHeight: '100vh', color: '#0f172a' }}>
       <TemplateNav />
       
-      <main style={{ padding: 16, maxWidth: 1400, margin: '0 auto' }}>
+      <main style={{ padding: 16, maxWidth: 2000, margin: '0 auto' }}>
         {/* Auth warning banner */}
         {authState.kind === 'unauth' && (
           <div style={authBannerStyle}>
