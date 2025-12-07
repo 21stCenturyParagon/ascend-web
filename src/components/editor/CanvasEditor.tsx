@@ -81,28 +81,31 @@ const EditableTextField: FC<{
 
   return (
     <Group>
-      <Rect
-        ref={shapeRef}
-        x={el.x}
-        y={el.y}
-        width={el.width}
-        height={el.height}
-        stroke={isSelected ? '#2563eb' : '#9ca3af'}
-        dash={isSelected ? undefined : [4, 4]}
-        strokeWidth={isSelected ? 2 : 1}
-        fill={isSelected ? 'rgba(37,99,235,0.05)' : 'transparent'}
-        draggable={editable}
-        onClick={(e) => {
-          e.cancelBubble = true;
-          onSelect();
-        }}
-        onTap={(e) => {
-          e.cancelBubble = true;
-          onSelect();
-        }}
-        onDragEnd={handleDragEnd}
-        onTransformEnd={handleTransformEnd}
-      />
+      {/* Only show border rect in editable mode */}
+      {editable && (
+        <Rect
+          ref={shapeRef}
+          x={el.x}
+          y={el.y}
+          width={el.width}
+          height={el.height}
+          stroke={isSelected ? '#2563eb' : '#9ca3af'}
+          dash={isSelected ? undefined : [4, 4]}
+          strokeWidth={isSelected ? 2 : 1}
+          fill={isSelected ? 'rgba(37,99,235,0.05)' : 'transparent'}
+          draggable={editable}
+          onClick={(e) => {
+            e.cancelBubble = true;
+            onSelect();
+          }}
+          onTap={(e) => {
+            e.cancelBubble = true;
+            onSelect();
+          }}
+          onDragEnd={handleDragEnd}
+          onTransformEnd={handleTransformEnd}
+        />
+      )}
       <Text
         x={el.x}
         y={el.y}
@@ -207,13 +210,16 @@ export const CanvasEditor: FC<Props> = ({
           const y = rowIndex * (el.rowHeight + el.rowGap);
           return (
             <Group key={`${el.id}-row-${rowIndex}`} y={y}>
-              <Rect
-                width={el.width}
-                height={el.rowHeight}
-                stroke={isSelected ? '#2563eb' : '#d1d5db'}
-                strokeWidth={isSelected ? 2 : 1}
-                fill={isSelected ? 'rgba(37,99,235,0.03)' : 'transparent'}
-              />
+              {/* Only show border rect in editable mode */}
+              {editable && (
+                <Rect
+                  width={el.width}
+                  height={el.rowHeight}
+                  stroke={isSelected ? '#2563eb' : '#d1d5db'}
+                  strokeWidth={isSelected ? 2 : 1}
+                  fill={isSelected ? 'rgba(37,99,235,0.03)' : 'transparent'}
+                />
+              )}
               <Text
                 text={text}
                 width={el.width}
