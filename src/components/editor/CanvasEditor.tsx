@@ -66,22 +66,25 @@ export const CanvasEditor: FC<Props> = ({
   }, [config.elements]);
 
   useEffect(() => {
-    if (!transformerRef.current) return;
+    if (!editable || !transformerRef.current) return;
     const stage = currentStageRef.current;
     const transformer = transformerRef.current;
+    
     if (!stage || !selectedNodeName || !selectedElement || selectedElement.type !== 'text') {
       transformer.nodes([]);
       transformer.getLayer()?.batchDraw();
       return;
     }
+    
     const node = stage.findOne(`.${selectedNodeName}`);
     if (node) {
       transformer.nodes([node]);
+      transformer.getLayer()?.batchDraw();
     } else {
       transformer.nodes([]);
+      transformer.getLayer()?.batchDraw();
     }
-    transformer.getLayer()?.batchDraw();
-  }, [selectedNodeName, selectedElement, currentStageRef]);
+  }, [editable, selectedNodeName, selectedElement, currentStageRef]);
 
   const handleStageClick = () => {
     if (onSelect) onSelect(null);
@@ -102,10 +105,16 @@ export const CanvasEditor: FC<Props> = ({
     const node = evt.target;
     const scaleX = node.scaleX();
     const scaleY = node.scaleY();
-    const newWidth = Math.max(40, node.width() * scaleX);
-    const newHeight = Math.max(24, node.height() * scaleY);
+    
+    // Calculate new dimensions based on scale
+    const newWidth = Math.max(40, el.width * scaleX);
+    const newHeight = Math.max(24, el.height * scaleY);
+    
+    // Reset scale to 1
     node.scaleX(1);
     node.scaleY(1);
+    
+    // Update element with new dimensions
     onUpdateElement({
       ...el,
       x: node.x(),
@@ -135,8 +144,9 @@ export const CanvasEditor: FC<Props> = ({
           width={el.width}
           height={el.height}
           stroke={selectedId === el.id ? '#2563eb' : '#9ca3af'}
-          dash={[4, 4]}
-          strokeWidth={1}
+          dash={selectedId === el.id ? undefined : [4, 4]}
+          strokeWidth={selectedId === el.id ? 2 : 1}
+          fill={selectedId === el.id ? 'rgba(37,99,235,0.05)' : 'transparent'}
         />
         <Text
           text={value}
@@ -184,13 +194,12 @@ export const CanvasEditor: FC<Props> = ({
         key={el.id}
         x={el.x}
         y={el.y}
-        draggable={editable}
+        draggable={false}
         name={`node-${el.id}`}
         onClick={(e) => {
           e.cancelBubble = true;
           onSelect?.(el.id);
         }}
-        onDragEnd={(evt) => handleDragEnd(el, evt)}
       >
         {showRows.map((row, rowIndex) => {
           const y = rowIndex * (el.rowHeight + rowGap);
@@ -232,13 +241,12 @@ export const CanvasEditor: FC<Props> = ({
         {!showRows.length && <Placeholder text="Repeating table" width={200} height={el.rowHeight} />}
 
         {editable && (
-          <Group listening={false}>
+          <Group>
             {el.columns.map((col, colIdx) => (
               <Group
                 key={`${el.id}-col-handle-${col.key}`}
                 x={col.x}
                 y={-18}
-                listening
               >
                 <Rect
                   width={col.width}
@@ -247,21 +255,13 @@ export const CanvasEditor: FC<Props> = ({
                   stroke="#2563eb"
                   cornerRadius={4}
                   draggable
-                  dragBoundFunc={(pos) => ({ x: pos.x, y: -18 })}
                   onDragMove={(evt) => {
-                    evt.cancelBubble = true;
-                    const deltaX = evt.target.x();
-                    handleColumnDrag(colIdx, deltaX);
+                    const newX = evt.target.x();
+                    handleColumnDrag(colIdx, newX);
+                    evt.target.x(0);
                   }}
                   onDragEnd={(evt) => {
-                    evt.cancelBubble = true;
                     evt.target.position({ x: 0, y: -18 });
-                  }}
-                  onMouseDown={(evt) => {
-                    evt.cancelBubble = true;
-                  }}
-                  onTouchStart={(evt) => {
-                    evt.cancelBubble = true;
                   }}
                 />
                 <Text
@@ -280,25 +280,19 @@ export const CanvasEditor: FC<Props> = ({
                   y={0}
                   width={12}
                   height={16}
-                  fill="rgba(37,99,235,0.18)"
+                  fill="rgba(37,99,235,0.3)"
                   stroke="#2563eb"
-                  strokeWidth={0.5}
+                  strokeWidth={1}
                   draggable
                   dragBoundFunc={(pos) => ({ x: Math.max(20, pos.x), y: 0 })}
                   onDragMove={(evt) => {
-                    evt.cancelBubble = true;
-                    const newWidth = Math.max(40, col.width + evt.target.x() - (col.width - 6));
+                    const deltaX = evt.target.x() - (col.width - 6);
+                    const newWidth = Math.max(40, col.width + deltaX);
                     handleColumnResize(colIdx, newWidth);
+                    evt.target.x(col.width - 6);
                   }}
                   onDragEnd={(evt) => {
-                    evt.cancelBubble = true;
                     evt.target.position({ x: col.width - 6, y: 0 });
-                  }}
-                  onMouseDown={(evt) => {
-                    evt.cancelBubble = true;
-                  }}
-                  onTouchStart={(evt) => {
-                    evt.cancelBubble = true;
                   }}
                 />
               </Group>
@@ -326,6 +320,8 @@ export const CanvasEditor: FC<Props> = ({
           <Transformer
             ref={transformerRef}
             rotateEnabled={false}
+            keepRatio={false}
+            resizeEnabled={true}
             enabledAnchors={[
               'top-left',
               'top-center',
