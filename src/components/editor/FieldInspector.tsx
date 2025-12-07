@@ -10,6 +10,19 @@ type Props = {
 export const FieldInspector: React.FC<Props> = ({ field, onChange, onDelete }) => {
   const update = (patch: Partial<TextField>) => onChange({ ...field, ...patch });
 
+  const googleFonts = [
+    'Inter',
+    'Roboto',
+    'Poppins',
+    'Montserrat',
+    'Open Sans',
+    'Lato',
+    'Oswald',
+    'Raleway',
+    'Source Sans Pro',
+    'Merriweather',
+  ];
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
       <h3 style={{ margin: '8px 0 4px', fontWeight: 600 }}>Text Field</h3>
@@ -24,12 +37,13 @@ export const FieldInspector: React.FC<Props> = ({ field, onChange, onDelete }) =
       </label>
       <label>
         Font Family
-        <input
-          type="text"
-          value={field.fontFamily}
-          onChange={(e) => update({ fontFamily: e.target.value })}
-          style={{ width: '100%' }}
-        />
+        <select value={field.fontFamily} onChange={(e) => update({ fontFamily: e.target.value })}>
+          {googleFonts.map((font) => (
+            <option key={font} value={font} style={{ fontFamily: font }}>
+              {font}
+            </option>
+          ))}
+        </select>
       </label>
       <label>
         Font Size
@@ -37,6 +51,17 @@ export const FieldInspector: React.FC<Props> = ({ field, onChange, onDelete }) =
           type="number"
           value={field.fontSize}
           onChange={(e) => update({ fontSize: Number(e.target.value) || field.fontSize })}
+          style={{ width: '100%' }}
+        />
+      </label>
+      <label>
+        Line Height
+        <input
+          type="number"
+          step="0.1"
+          min={1}
+          value={field.lineHeight ?? 1.2}
+          onChange={(e) => update({ lineHeight: Math.max(1, Number(e.target.value) || 1.2) })}
           style={{ width: '100%' }}
         />
       </label>

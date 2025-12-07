@@ -57,6 +57,16 @@ export const RepeatingTableInspector: React.FC<Props> = ({ table, onChange, onDe
           style={{ width: '100%' }}
         />
       </label>
+      <label>
+        Row Gap
+        <input
+          type="number"
+          min={0}
+          value={table.rowGap ?? 0}
+          onChange={(e) => update({ rowGap: Math.max(0, Number(e.target.value) || 0) })}
+          style={{ width: '100%' }}
+        />
+      </label>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <strong>Columns</strong>
         <button onClick={addColumn} style={{ padding: '4px 10px' }}>

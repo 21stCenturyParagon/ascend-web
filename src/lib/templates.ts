@@ -12,6 +12,7 @@ export type TextField = {
   fontFamily: string;
   fontSize: number;
   fontWeight?: number;
+  lineHeight?: number;
   fill: string;
   align: 'left' | 'center' | 'right';
 };
@@ -34,6 +35,7 @@ export type RepeatingTable = {
   x: number;
   y: number;
   rowHeight: number;
+  rowGap?: number;
   maxRows: number;
   columns: TableColumn[];
 };

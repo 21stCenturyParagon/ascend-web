@@ -136,6 +136,8 @@ export const CanvasEditor: FC<Props> = ({
           fontFamily={el.fontFamily}
           fontSize={el.fontSize}
           fontStyle={el.fontWeight ? 'bold' : 'normal'}
+          lineHeight={el.lineHeight ?? 1.2}
+          wrap="word"
           fill={el.fill}
           align={el.align}
           verticalAlign="middle"
@@ -149,6 +151,7 @@ export const CanvasEditor: FC<Props> = ({
     const rows = data?.tableRows?.slice(0, el.maxRows) ?? [];
     const showRows: Array<Record<string, string> | { __placeholder: number }> =
       rows.length ? rows : Array.from({ length: el.maxRows }).map((_, idx) => ({ __placeholder: idx + 1 }));
+    const rowGap = el.rowGap ?? 0;
     return (
       <Group
         key={el.id}
@@ -163,17 +166,31 @@ export const CanvasEditor: FC<Props> = ({
         onDragEnd={(evt) => handleDragEnd(el, evt)}
       >
         {showRows.map((row, rowIndex) => {
-          const y = rowIndex * el.rowHeight;
+          const y = rowIndex * (el.rowHeight + rowGap);
           return (
             <Group key={`${el.id}-row-${rowIndex}`} y={y}>
-              {el.columns.map((col) => {
+              {el.columns.map((col, colIdx) => {
                 const x = col.x;
                 const text =
                   '__placeholder' in row
                     ? String(row.__placeholder)
                     : (row as Record<string, string>)[col.key] ?? col.key;
                 return (
-                  <Group key={`${el.id}-row-${rowIndex}-col-${col.key}`} x={x}>
+                  <Group
+                    key={`${el.id}-row-${rowIndex}-col-${col.key}`}
+                    x={x}
+                    draggable={editable}
+                    onDragEnd={(evt) => {
+                      if (!editable || !onUpdateElement) return;
+                      const deltaX = evt.target.x();
+                      const updated = {
+                        ...el,
+                        columns: el.columns.map((c, i) => (i === colIdx ? { ...c, x: c.x + deltaX } : c)),
+                      };
+                      onUpdateElement(updated);
+                      evt.target.position({ x: 0, y: 0 });
+                    }}
+                  >
                     <Rect
                       width={col.width}
                       height={el.rowHeight}
@@ -187,11 +204,35 @@ export const CanvasEditor: FC<Props> = ({
                       fontFamily={col.fontFamily}
                       fontSize={col.fontSize}
                       fontStyle={col.fontWeight ? 'bold' : 'normal'}
+                      lineHeight={1.2}
                       fill={col.fill}
                       align={col.align}
                       verticalAlign="middle"
                       padding={4}
                     />
+                    {editable && (
+                      <Rect
+                        x={col.width - 6}
+                        y={0}
+                        width={12}
+                        height={el.rowHeight}
+                        fill="rgba(37,99,235,0.08)"
+                        stroke="#2563eb"
+                        strokeWidth={0.5}
+                        draggable
+                        dragBoundFunc={(pos) => ({ x: Math.max(20, pos.x), y: 0 })}
+                        onDragEnd={(evt) => {
+                          if (!onUpdateElement) return;
+                          const newWidth = Math.max(40, col.width + evt.target.x() - (col.width - 6));
+                          const updated = {
+                            ...el,
+                            columns: el.columns.map((c, i) => (i === colIdx ? { ...c, width: newWidth } : c)),
+                          };
+                          onUpdateElement(updated);
+                          evt.target.position({ x: col.width - 6, y: 0 });
+                        }}
+                      />
+                    )}
                   </Group>
                 );
               })}

@@ -20,9 +20,10 @@ function createTextField(): TextField {
     y: 50,
     width: 200,
     height: 50,
-    fontFamily: 'Arial',
+    fontFamily: 'Inter',
     fontSize: 22,
     fontWeight: 600,
+    lineHeight: 1.2,
     fill: '#000000',
     align: 'left',
   };
@@ -36,10 +37,11 @@ function createTable(): RepeatingTable {
     x: 50,
     y: 150,
     rowHeight: 48,
+    rowGap: 4,
     maxRows: 10,
     columns: [
-      { key: 'name', x: 0, width: 200, align: 'left', fontFamily: 'Arial', fontSize: 20, fontWeight: 600, fill: '#000000' },
-      { key: 'score', x: 210, width: 120, align: 'right', fontFamily: 'Arial', fontSize: 20, fontWeight: 700, fill: '#000000' },
+      { key: 'name', x: 0, width: 200, align: 'left', fontFamily: 'Inter', fontSize: 20, fontWeight: 600, fill: '#000000' },
+      { key: 'score', x: 210, width: 120, align: 'right', fontFamily: 'Inter', fontSize: 20, fontWeight: 700, fill: '#000000' },
     ],
   };
 }
@@ -176,7 +178,7 @@ export default function TemplateBuilder() {
         >
           <div>Sign in to save templates and upload backgrounds.</div>
           <button
-            onClick={() => signInWithDiscord('/templates/new')}
+            onClick={() => signInWithDiscord('/templates')}
             style={{ background: '#2563eb', color: '#fff', padding: '8px 12px', border: 'none', borderRadius: 6 }}
           >
             Sign in with Discord
