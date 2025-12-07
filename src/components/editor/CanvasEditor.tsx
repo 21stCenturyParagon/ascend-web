@@ -22,6 +22,8 @@ type Props = {
   onUpdateElement?: (element: TemplateElement) => void;
   editable?: boolean;
   stageRef?: RefObject<StageType | null>;
+  scale?: number;
+  onScaleChange?: (scale: number) => void;
 };
 
 const Background: FC<{ url?: string; width: number; height: number }> = ({ url, width, height }) => {
@@ -136,12 +138,28 @@ export const CanvasEditor: FC<Props> = ({
   onUpdateElement,
   editable = true,
   stageRef,
+  scale = 1,
+  onScaleChange,
 }) => {
   const internalStageRef = useRef<StageType>(null);
   const transformerRef = useRef<Konva.Transformer>(null);
   const [fontVersion, setFontVersion] = useState(0);
 
   const currentStageRef = stageRef ?? internalStageRef;
+
+  // Handle mouse wheel zoom
+  const handleWheel = useCallback((e: KonvaEventObject<WheelEvent>) => {
+    if (!onScaleChange || !editable) return;
+    
+    e.evt.preventDefault();
+    
+    const scaleBy = 1.1;
+    const newScale = e.evt.deltaY < 0 
+      ? Math.min(scale * scaleBy, 3) // Max zoom 300%
+      : Math.max(scale / scaleBy, 0.25); // Min zoom 25%
+    
+    onScaleChange(newScale);
+  }, [scale, onScaleChange, editable]);
 
   const selectedElement = useMemo(
     () => config.elements.find((el) => el.id === selectedId) ?? null,
@@ -243,11 +261,14 @@ export const CanvasEditor: FC<Props> = ({
 
   return (
     <Stage
-      width={config.canvas.width}
-      height={config.canvas.height}
+      width={config.canvas.width * scale}
+      height={config.canvas.height * scale}
+      scaleX={scale}
+      scaleY={scale}
       ref={currentStageRef}
       onClick={handleStageClick}
       onTap={handleStageClick}
+      onWheel={handleWheel}
       style={{ border: '1px solid #e5e7eb', background: '#f8fafc' }}
     >
       <Layer listening={false}>

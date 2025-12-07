@@ -61,8 +61,14 @@ export default function TemplateBuilder() {
   const [name, setName] = useState<string>('Leaderboard Template');
   const [status, setStatus] = useState<Status>({ kind: 'idle' });
   const [authState, setAuthState] = useState<AuthState>({ kind: 'loading' });
+  const [zoom, setZoom] = useState<number>(1);
 
   const stageRef = useRef<any>(null);
+
+  const zoomIn = () => setZoom((z) => Math.min(z * 1.25, 3));
+  const zoomOut = () => setZoom((z) => Math.max(z / 1.25, 0.25));
+  const zoomReset = () => setZoom(1);
+  const zoomPercent = Math.round(zoom * 100);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -309,6 +315,16 @@ export default function TemplateBuilder() {
             <button onClick={redo} disabled={!canRedo} style={iconBtnStyle} title="Redo">
               ↪️
             </button>
+            <div style={dividerStyle} />
+            <button onClick={zoomOut} style={iconBtnStyle} title="Zoom Out">
+              ➖
+            </button>
+            <span style={zoomLabelStyle} onClick={zoomReset} title="Click to reset zoom">
+              {zoomPercent}%
+            </span>
+            <button onClick={zoomIn} style={iconBtnStyle} title="Zoom In">
+              ➕
+            </button>
           </div>
 
           <div style={toolbarRight}>
@@ -348,7 +364,12 @@ export default function TemplateBuilder() {
               onUpdateElement={setElement}
               editable
               stageRef={stageRef}
+              scale={zoom}
+              onScaleChange={setZoom}
             />
+            <div style={zoomHintStyle}>
+              Use mouse wheel to zoom • Click percentage to reset
+            </div>
           </div>
           
           <div style={inspectorPanelStyle}>
@@ -543,4 +564,23 @@ const emptyInspectorStyle: React.CSSProperties = {
   textAlign: 'center',
   color: '#6b7280',
   padding: '32px 16px',
+};
+
+const zoomLabelStyle: React.CSSProperties = {
+  padding: '4px 8px',
+  background: '#f1f5f9',
+  borderRadius: 4,
+  fontSize: 12,
+  fontWeight: 600,
+  minWidth: 45,
+  textAlign: 'center',
+  cursor: 'pointer',
+  userSelect: 'none',
+};
+
+const zoomHintStyle: React.CSSProperties = {
+  marginTop: 8,
+  fontSize: 12,
+  color: '#94a3b8',
+  textAlign: 'center',
 };
