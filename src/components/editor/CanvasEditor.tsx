@@ -5,6 +5,7 @@ import useImage from 'use-image';
 import type { Stage as StageType } from 'konva/lib/Stage';
 import type { KonvaEventObject } from 'konva/lib/Node';
 import type { TemplateConfig, TemplateElement, TextField, RepeatingTable } from '../../lib/templates';
+import { loadFont } from '../../lib/fonts';
 
 type RenderData = {
   singleValues?: Record<string, string>;
@@ -55,6 +56,14 @@ export const CanvasEditor: FC<Props> = ({
     [config.elements, selectedId],
   );
   const selectedNodeName = useMemo(() => (selectedId ? `node-${selectedId}` : null), [selectedId]);
+
+  useEffect(() => {
+    // Ensure fonts used in elements are loaded into the document.
+    config.elements.forEach((el) => {
+      if (el.type === 'text') loadFont(el.fontFamily);
+      else el.columns.forEach((col) => loadFont(col.fontFamily));
+    });
+  }, [config.elements]);
 
   useEffect(() => {
     if (!transformerRef.current) return;
@@ -186,7 +195,7 @@ export const CanvasEditor: FC<Props> = ({
         {showRows.map((row, rowIndex) => {
           const y = rowIndex * (el.rowHeight + rowGap);
           return (
-            <Group key={`${el.id}-row-${rowIndex}`} y={y}>
+            <Group key={`${el.id}-row-${rowIndex}`} y={y} listening={false}>
               {el.columns.map((col) => {
                 const x = col.x;
                 const text =
@@ -194,7 +203,7 @@ export const CanvasEditor: FC<Props> = ({
                     ? String(row.__placeholder)
                     : (row as Record<string, string>)[col.key] ?? col.key;
                 return (
-                  <Group key={`${el.id}-row-${rowIndex}-col-${col.key}`} x={x}>
+                  <Group key={`${el.id}-row-${rowIndex}-col-${col.key}`} x={x} listening={false}>
                     <Rect
                       width={col.width}
                       height={el.rowHeight}
@@ -225,7 +234,13 @@ export const CanvasEditor: FC<Props> = ({
         {editable && (
           <Group>
             {el.columns.map((col, colIdx) => (
-              <Group key={`${el.id}-col-handle-${col.key}`} x={col.x} y={-18}>
+              <Group
+                key={`${el.id}-col-handle-${col.key}`}
+                x={col.x}
+                y={-18}
+                onMouseDown={(e) => (e.cancelBubble = true)}
+                onDragStart={(e) => (e.cancelBubble = true)}
+              >
                 <Rect
                   width={col.width}
                   height={16}
@@ -233,11 +248,18 @@ export const CanvasEditor: FC<Props> = ({
                   stroke="#2563eb"
                   cornerRadius={4}
                   draggable
-                  onDragEnd={(evt) => {
+                  dragBoundFunc={(pos) => ({ x: pos.x, y: -18 })}
+                  onDragMove={(evt) => {
+                    evt.cancelBubble = true;
                     const deltaX = evt.target.x();
                     handleColumnDrag(colIdx, deltaX);
+                  }}
+                  onDragEnd={(evt) => {
+                    evt.cancelBubble = true;
                     evt.target.position({ x: 0, y: -18 });
                   }}
+                  onMouseDown={(evt) => (evt.cancelBubble = true)}
+                  onTouchStart={(evt) => (evt.cancelBubble = true)}
                 />
                 <Text
                   text={col.key}
@@ -259,11 +281,17 @@ export const CanvasEditor: FC<Props> = ({
                   strokeWidth={0.5}
                   draggable
                   dragBoundFunc={(pos) => ({ x: Math.max(20, pos.x), y: 0 })}
-                  onDragEnd={(evt) => {
+                  onDragMove={(evt) => {
+                    evt.cancelBubble = true;
                     const newWidth = Math.max(40, col.width + evt.target.x() - (col.width - 6));
                     handleColumnResize(colIdx, newWidth);
+                  }}
+                  onDragEnd={(evt) => {
+                    evt.cancelBubble = true;
                     evt.target.position({ x: col.width - 6, y: 0 });
                   }}
+                  onMouseDown={(evt) => (evt.cancelBubble = true)}
+                  onTouchStart={(evt) => (evt.cancelBubble = true)}
                 />
               </Group>
             ))}
