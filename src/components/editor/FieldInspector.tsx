@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import type { TextField } from '../../lib/templates';
+import { fetchGoogleFonts, loadFont } from '../../lib/fonts';
 
 type Props = {
   field: TextField;
@@ -10,18 +11,17 @@ type Props = {
 export const FieldInspector: React.FC<Props> = ({ field, onChange, onDelete }) => {
   const update = (patch: Partial<TextField>) => onChange({ ...field, ...patch });
 
-  const googleFonts = [
-    'Inter',
-    'Roboto',
-    'Poppins',
-    'Montserrat',
-    'Open Sans',
-    'Lato',
-    'Oswald',
-    'Raleway',
-    'Source Sans Pro',
-    'Merriweather',
-  ];
+  const [fonts, setFonts] = useState<string[]>([]);
+
+  useEffect(() => {
+    void fetchGoogleFonts().then((list) => setFonts(list));
+  }, []);
+
+  useEffect(() => {
+    loadFont(field.fontFamily);
+  }, [field.fontFamily]);
+
+  const fontOptions = useMemo(() => (fonts.length ? fonts : [field.fontFamily]), [fonts, field.fontFamily]);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -38,7 +38,7 @@ export const FieldInspector: React.FC<Props> = ({ field, onChange, onDelete }) =
       <label>
         Font Family
         <select value={field.fontFamily} onChange={(e) => update({ fontFamily: e.target.value })}>
-          {googleFonts.map((font) => (
+          {fontOptions.map((font) => (
             <option key={font} value={font} style={{ fontFamily: font }}>
               {font}
             </option>

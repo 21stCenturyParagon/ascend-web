@@ -125,7 +125,7 @@ export default function UseTemplate() {
         <div style={{ border: '1px solid #e5e7eb', borderRadius: 8, padding: 12, background: '#fff' }}>
           <h3 style={{ marginTop: 0 }}>Sign in required</h3>
           <p>{status.message}</p>
-          <button onClick={() => signInWithDiscord(window.location.pathname)} style={{ background: '#2563eb', color: '#fff', padding: '8px 12px', border: 'none', borderRadius: 6 }}>
+          <button onClick={() => signInWithDiscord('/templates')} style={{ background: '#2563eb', color: '#fff', padding: '8px 12px', border: 'none', borderRadius: 6 }}>
             Sign in with Discord
           </button>
         </div>
