@@ -21,7 +21,7 @@ type Props = {
   onSelect?: (id: string | null) => void;
   onUpdateElement?: (element: TemplateElement) => void;
   editable?: boolean;
-  stageRef?: RefObject<StageType>;
+  stageRef?: RefObject<StageType | null>;
 };
 
 const Background: FC<{ url?: string; width: number; height: number }> = ({ url, width, height }) => {

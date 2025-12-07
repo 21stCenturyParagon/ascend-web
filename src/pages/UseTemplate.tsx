@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import type { Stage as KonvaStage } from 'konva/lib/Stage';
 import CanvasEditor from '../components/editor/CanvasEditor';
 import type { TemplateConfig, TemplateRecord } from '../lib/templates';
 import { getPublicImageUrl, getTemplateById, mapCsvToTemplateData } from '../lib/templates';
@@ -23,7 +24,7 @@ export default function UseTemplate() {
   const [backgroundUrl, setBackgroundUrl] = useState<string | undefined>();
   const [headers, setHeaders] = useState<string[]>([]);
   const [rows, setRows] = useState<Record<string, string>[]>([]);
-  const stageRef = useRef<any>(null);
+  const stageRef = useRef<KonvaStage | null>(null);
 
   const maxRows = useMemo(() => (config ? deriveMaxRows(config) : 0), [config]);
   const isOverLimit = maxRows > 0 && rows.length > maxRows;
@@ -108,26 +109,77 @@ export default function UseTemplate() {
         setStatus({ kind: 'error', message: 'Canvas not ready. Please wait for the template to fully load.' });
         return;
       }
-      
-      // Get the Konva stage instance
-      const konvaStage = stage.getStage ? stage.getStage() : stage;
-      if (!konvaStage || typeof konvaStage.toDataURL !== 'function') {
+
+      // In react-konva, the ref points directly to the Konva Stage instance
+      if (typeof stage.toBlob !== 'function' && typeof stage.toDataURL !== 'function') {
         setStatus({ kind: 'error', message: 'Unable to access canvas. Please refresh and try again.' });
         return;
       }
 
-      const uri: string = konvaStage.toDataURL({ pixelRatio: 2, mimeType: 'image/png' });
+      const filename = `${template?.name?.replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, '_') || 'filled_template'}.png`;
+
+      // Try using toBlob first (more reliable)
+      if (typeof stage.toBlob === 'function') {
+        const blob = await new Promise<Blob | null>((resolve) => {
+          stage.toBlob({
+            pixelRatio: 2,
+            mimeType: 'image/png',
+            callback: (blob: Blob | null) => resolve(blob),
+          });
+        });
+
+        if (blob) {
+          const blobUrl = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.download = filename;
+          link.href = blobUrl;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          setTimeout(() => URL.revokeObjectURL(blobUrl), 100);
+          setStatus({ kind: 'ready', message: 'Image downloaded successfully!' });
+          return;
+        }
+      }
+
+      // Fallback to toDataURL
+      const dataUrl = stage.toDataURL({ pixelRatio: 2 });
+      
+      if (!dataUrl || typeof dataUrl !== 'string' || !dataUrl.startsWith('data:')) {
+        setStatus({ kind: 'error', message: 'Failed to generate image. Please try again.' });
+        return;
+      }
+
+      // Convert data URL to Blob for more reliable download
+      const parts = dataUrl.split(',');
+      if (parts.length !== 2) {
+        setStatus({ kind: 'error', message: 'Invalid image data generated.' });
+        return;
+      }
+      
+      const byteString = atob(parts[1]);
+      const mimeMatch = parts[0].match(/:(.*?);/);
+      const mimeType = mimeMatch ? mimeMatch[1] : 'image/png';
+      const arrayBuffer = new ArrayBuffer(byteString.length);
+      const uint8Array = new Uint8Array(arrayBuffer);
+      for (let i = 0; i < byteString.length; i++) {
+        uint8Array[i] = byteString.charCodeAt(i);
+      }
+      const blob = new Blob([arrayBuffer], { type: mimeType });
+      const blobUrl = URL.createObjectURL(blob);
+
       const link = document.createElement('a');
-      link.href = uri;
-      link.download = `${template?.name?.replace(/[^a-zA-Z0-9]/g, '_') || 'filled-template'}.png`;
+      link.download = filename;
+      link.href = blobUrl;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+      
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 100);
       setStatus({ kind: 'ready', message: 'Image downloaded successfully!' });
     } catch (err) {
       console.error('Download error:', err);
       const message = err instanceof Error ? err.message : 'Unable to download image.';
-      // Check for common CORS error
       if (message.includes('tainted') || message.includes('cross-origin') || message.includes('SecurityError')) {
         setStatus({ kind: 'error', message: 'Cannot export image due to cross-origin restrictions. The background image may not be accessible.' });
       } else {
