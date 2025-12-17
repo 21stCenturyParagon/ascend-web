@@ -5,7 +5,7 @@ import { AiOutlineLoading3Quarters } from 'react-icons/ai';
 import BrandHeader from '../components/BrandHeader';
 import useResponsiveLayout from '../hooks/useResponsiveLayout';
 
-const STORAGE_URL = 'https://wdcwyvfeegchjadtyhkh.supabase.co/storage/v1/object/public/public-documents/ASCEND%20BREAKPOINT%20SERIES%202a8a5f3a43708161872ee88a6d56b1a5.md';
+const STORAGE_URL = 'https://wdcwyvfeegchjadtyhkh.supabase.co/storage/v1/object/public/public-documents/ASCEND%20BREAKPOINT%20SERIES%202a8a5f3a43708161872ee88a6d56b1a5%20(2).md';
 
 export default function Rulebook2() {
   const { isTablet, headerMaxWidth } = useResponsiveLayout();
